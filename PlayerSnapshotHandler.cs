@@ -238,7 +238,7 @@ namespace BF2142.SnapshotProcessor {
 
 
                 //now that all calculations, etc are done, output to pages!
-                string[] pages = new string[] {"base","ply","titan","wrk","com","ovr","comp"};
+                string[] pages = new string[] {"base","ply","titan","wrk","com","ovr","comp", "veh", "wep"};
                 foreach(var page in pages) {
                     await PerformPlayerInfoHandlingForType(profileid, page, data);
                 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using QueueProcessor;
+using System.Text.RegularExpressions;
 
 namespace BF2142.SnapshotProcessor
 {
