@@ -1,0 +1,22 @@
+{
+    "Logging": {
+      "LogLevel": {
+        "Default": "Debug"
+      }
+    },
+    "AMQP": {
+      "ConnectionString": "amqp://openspy:openspy@localhost",
+      "QueueName": "snapshot-processor",
+      "ExchangeName": "openspy.gamestats",
+      "RoutingKey": "snapshots"
+    },
+    "SnapshotDatabase": {
+        "MongoUri": "mongodb://localhost:27017",
+        "MongoDatabase": "gamestats"
+    },
+    "API": {
+      "URL": "http://api.openspy.net",
+      "APIKey": "xxx"
+    }
+  }
+  
