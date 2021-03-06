@@ -27,6 +27,26 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "wep")]
         public string nick {get; set; }
 
+        [JsonProperty("bp-1")]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Set)]
+        [PlayerInfoOutputPageAttribute(PageName = "base")]
+        public int has_nothern_strike {get => 1; set { } }
+
+        [JsonProperty("ent-1")]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Set)]
+        [PlayerInfoOutputPageAttribute(PageName = "base")]
+        public int has_ent_1 {get => 1; set { } }
+
+        [JsonProperty("ent-2")]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Set)]
+        [PlayerInfoOutputPageAttribute(PageName = "base")]
+        public int has_ent_2 {get => 1; set { } }
+
+        [JsonProperty("ent-3")]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Set)]
+        [PlayerInfoOutputPageAttribute(PageName = "base")]
+        public int has_bf2_vet_tag {get => 1; set { } }
+
         
         [JsonProperty("t")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Ignore)]
