@@ -30,7 +30,7 @@ namespace BF2142.SnapshotProcessor {
             await ComputePage(server_snapshot, gameserverSnapshot, currentPlayerInfo, processorConfig, collection, "sup");
         }
         private static async Task ComputePage(BF2142Snapshot server_snapshot, BF2142PlayerSnapshot gameserverSnapshot, BF2142PlayerSnapshot currentPlayerInfo, ProcessorConfiguration processorConfig, IMongoCollection<BsonDocument> collection, string pageName) {
-            var updateDocument = GetUpdateDocument("data.$.", pageName, gameserverSnapshot);
+            var updateDocument = GetUpdateDocument("data.$.", pageName, currentPlayerInfo);
             //try perform update
 
             var date = GetDateFromRecord(server_snapshot);
