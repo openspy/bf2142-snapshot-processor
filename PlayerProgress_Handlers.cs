@@ -62,6 +62,12 @@ namespace BF2142.SnapshotProcessor {
             dataValue["$each"] = eachValue;
             dataValue["$slice"] = new BsonInt32(-MAX_PROGRESS_ELEMENTS);
 
+            var sortValue = new BsonDocument {
+
+            };
+            sortValue["date"] = new BsonInt32(-1);
+            dataValue["$sort"] = sortValue;
+
             dataElement["data"] = dataValue;
 
             var pushElement = new BsonDocument{};
