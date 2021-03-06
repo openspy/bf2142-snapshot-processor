@@ -51,6 +51,7 @@ namespace BF2142.SnapshotProcessor {
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("capa")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "flag", VariableName = "assist")]
 
         public int capture_assists {get; set; }     //+ => Capture Assists
 
@@ -58,6 +59,7 @@ namespace BF2142.SnapshotProcessor {
         [JsonProperty("cpt")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "flag", VariableName = "captures")]
 
         public int captured_control_points {get; set; }      //+ => Captured CPs
 
@@ -66,6 +68,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
+        [PlayerProgressOutputPageAttribute(PageName = "point", VariableName = "experiencepoints")]
 
         public int career_points {get; set; }      //+ => Captured CPs
         
@@ -74,6 +77,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
         [PlayerInfoOutputPageAttribute(PageName = "com")]
+        [PlayerProgressOutputPageAttribute(PageName = "point", VariableName = "points")]
 
         public double commander_score {get; set; }      //+ => Commander Score
         
@@ -87,6 +91,7 @@ namespace BF2142.SnapshotProcessor {
         [JsonProperty("dcpt")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "flag", VariableName = "defend")]
 
         public int defended_control_points {get; set; }     //+ => Defended Control Points			
 
@@ -105,6 +110,8 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
+        [PlayerProgressOutputPageAttribute(PageName = "point", VariableName = "globalscore")]
+        [PlayerProgressOutputPageAttribute(PageName = "score", VariableName = "score")]
 
         public int global_score {get; set; }     //+ => Global Score
         
@@ -112,6 +119,7 @@ namespace BF2142.SnapshotProcessor {
         [JsonProperty("hls")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "sup", VariableName = "hls")]
 
         public int heals {get; set; }      //+ => Heals
         
@@ -171,6 +179,7 @@ namespace BF2142.SnapshotProcessor {
         [JsonProperty("resp")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "sup", VariableName = "resp")]
 
         public int resupplies {get; set; }     //+ => Re-supplies
         
@@ -178,12 +187,14 @@ namespace BF2142.SnapshotProcessor {
         [JsonProperty("rps")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "sup", VariableName = "rps")]
 
         public int repairs {get; set; }      //+ => Repairs
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("rvs")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "sup", VariableName = "rvs")]
 
         public int revives {get; set; }      //+ => Revives
         
@@ -217,12 +228,14 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
         [PlayerInfoOutputPageAttribute(PageName = "com")]
+        [PlayerProgressOutputPageAttribute(PageName = "role", VariableName = "cotime")]
 
         public int time_as_commander {get; set; }      //+ => Time As Commander
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("talw")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "role", VariableName = "lwtime")]
 
         public int time_as_lone_wolf {get; set; }     //+ => Time As Lone Wolf
         
@@ -237,6 +250,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
         [PlayerInfoOutputPageAttribute(PageName = "com")]
+        [PlayerProgressOutputPageAttribute(PageName = "role", VariableName = "sltime")]
 
         public int time_as_squad_leader {get; set; }     //+ => Time As Squad Leader
         
@@ -244,6 +258,7 @@ namespace BF2142.SnapshotProcessor {
         [JsonProperty("tasm")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "role", VariableName = "smtime")]
 
         public int time_as_squad_member {get; set; }     //+ => Time As Squad Member
         
@@ -301,12 +316,14 @@ namespace BF2142.SnapshotProcessor {
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("toth")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
+        [PlayerProgressOutputPageAttribute(PageName = "waccu", VariableName = "toth")]
 
         public int total_hits {get; set; }     //+ => Total Hits
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("tots")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
+        [PlayerProgressOutputPageAttribute(PageName = "waccu", VariableName = "tots")]
 
         public int total_shots {get; set; }     //+ => Total Fired
         
@@ -328,6 +345,7 @@ namespace BF2142.SnapshotProcessor {
         [JsonProperty("twsc")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "wrk")]
+        [PlayerProgressOutputPageAttribute(PageName = "twsc", VariableName = "twsc")]
 
         public int teamwork_score {get; set; }     //+ => Teamwork Score
 
@@ -530,6 +548,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "com")]
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
+        [PlayerProgressOutputPageAttribute(PageName = "wl", VariableName = "wins")]
         public int wins {get; set; }
 
         [JsonProperty("los")]
@@ -541,6 +560,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "com")]
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
+        [PlayerProgressOutputPageAttribute(PageName = "wl", VariableName = "losses")]
         public int losses {get; set; }
 
         [JsonProperty("wlr")]
@@ -563,6 +583,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "com")]
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
+        [PlayerProgressOutputPageAttribute(PageName = "waccu", VariableName = "waccu")]
         public double overall_accuracy {get; set; }
 
         [JsonProperty("ttp")]
@@ -574,6 +595,8 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "com")]
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
+        [PlayerProgressOutputPageAttribute(PageName = "ttp", VariableName = "ttp")]
+        [PlayerProgressOutputPageAttribute(PageName = "role", VariableName = "ttp")]
         public int total_time_played {get; set; }
 
         [JsonProperty("brs")]
