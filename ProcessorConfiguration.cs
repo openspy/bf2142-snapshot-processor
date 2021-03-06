@@ -1,64 +1,67 @@
 using System.Collections.Generic;  
 namespace BF2142.SnapshotProcessor {
-
+    public class RankScoreMap {
+        public int rank {get; set;}
+        public int score {get; set;}
+    }
     public class ProcessorConfiguration : QueueProcessor.ProcessorConfiguration {
         public ProcessorConfiguration() {
-            rank_scores = new int[44];
-            rank_scores[0] = 0;
-            rank_scores[1] = 40;
-            rank_scores[2] = 80;
-            rank_scores[3] = 120;
-            rank_scores[4] = 200;
-            rank_scores[5] = 330;
-            rank_scores[6] = 520;
-            rank_scores[7] = 750;
-            rank_scores[8] = 1050;
-            rank_scores[9] = 1400;
-            rank_scores[10] = 1800;
-            rank_scores[11] = 2250;
-            rank_scores[12] = 2850;
-            rank_scores[13] = 3550;
-            rank_scores[14] = 4400;
-            rank_scores[15] = 5300;
-            rank_scores[16] = 6250;
-            rank_scores[17] = 7250;
-            rank_scores[18] = 8250;
-            rank_scores[19] = 9300;
-            rank_scores[20] = 10400;
-            rank_scores[21] = 11550;
-            rank_scores[22] = 12700;
-            rank_scores[23] = 14000;
-            rank_scores[24] = 15300;
-            rank_scores[25] = 16700;
-            rank_scores[26] = 18300;
-            rank_scores[27] = 20100;
-            rank_scores[28] = 22100;
-            rank_scores[29] = 24200;
-            rank_scores[30] = 26400;
-            rank_scores[31] = 28800;
-            rank_scores[32] = 31500;
-            rank_scores[33] = 34200;
-            rank_scores[34] = 37100;
-            rank_scores[35] = 40200;
-            rank_scores[36] = 43300;
-            rank_scores[37] = 46900;
-            rank_scores[38] = 50500;
-            rank_scores[39] = 54100;
-            rank_scores[40] = 57700;
-            rank_scores[41] = 1000000;
-            rank_scores[42] = 0;
-            rank_scores[43] = 0;
+            rank_scores = new List<RankScoreMap>();
+            rank_scores.Add(new RankScoreMap {rank = 0, score = 0});
+            rank_scores.Add(new RankScoreMap { rank = 1, score = 40});
+            rank_scores.Add(new RankScoreMap { rank = 2, score = 80});
+            rank_scores.Add(new RankScoreMap { rank = 3, score = 120});
+            rank_scores.Add(new RankScoreMap { rank = 4, score = 200});
+            rank_scores.Add(new RankScoreMap { rank = 5, score = 330});
+            rank_scores.Add(new RankScoreMap { rank = 6, score = 520});
+            rank_scores.Add(new RankScoreMap { rank = 7, score = 750});
+            rank_scores.Add(new RankScoreMap { rank = 8, score = 1050});
+            rank_scores.Add(new RankScoreMap { rank = 9, score = 1400});
+            rank_scores.Add(new RankScoreMap { rank = 10, score = 1800});
+            rank_scores.Add(new RankScoreMap { rank = 11, score = 2250});
+            rank_scores.Add(new RankScoreMap { rank = 12, score = 2850});
+            rank_scores.Add(new RankScoreMap { rank = 13, score = 3550});
+            rank_scores.Add(new RankScoreMap { rank = 14, score = 4400});
+            rank_scores.Add(new RankScoreMap { rank = 15, score = 5300});
+            rank_scores.Add(new RankScoreMap { rank = 16, score = 6250});
+            rank_scores.Add(new RankScoreMap { rank = 17, score = 7250});
+            rank_scores.Add(new RankScoreMap { rank = 18, score = 8250});
+            rank_scores.Add(new RankScoreMap { rank = 19, score = 9300});
+            rank_scores.Add(new RankScoreMap { rank = 20, score = 10400});
+            rank_scores.Add(new RankScoreMap { rank = 21, score = 11550});
+            rank_scores.Add(new RankScoreMap { rank = 22, score = 12700});
+            rank_scores.Add(new RankScoreMap { rank = 23, score = 14000});
+            rank_scores.Add(new RankScoreMap { rank = 24, score = 15300});
+            rank_scores.Add(new RankScoreMap { rank = 25, score = 16700});
+            rank_scores.Add(new RankScoreMap { rank = 26, score = 18300});
+            rank_scores.Add(new RankScoreMap { rank = 27, score = 20100});
+            rank_scores.Add(new RankScoreMap { rank = 28, score = 22100});
+            rank_scores.Add(new RankScoreMap { rank = 29, score = 24200});
+            rank_scores.Add(new RankScoreMap { rank = 30, score = 26400});
+            rank_scores.Add(new RankScoreMap { rank = 31, score = 28800});
+            rank_scores.Add(new RankScoreMap { rank = 32, score = 31500});
+            rank_scores.Add(new RankScoreMap { rank = 33, score = 34200});
+            rank_scores.Add(new RankScoreMap { rank = 34, score = 37100});
+            rank_scores.Add(new RankScoreMap { rank = 35, score = 40200});
+            rank_scores.Add(new RankScoreMap { rank = 36, score = 43300});
+            rank_scores.Add(new RankScoreMap { rank = 37, score = 46900});
+            rank_scores.Add(new RankScoreMap { rank = 38, score = 50500});
+            rank_scores.Add(new RankScoreMap { rank = 39, score = 54100});
+            rank_scores.Add(new RankScoreMap { rank = 40, score = 57700});
+            rank_scores.Add(new RankScoreMap { rank = 41, score = 1000000});
+            //rank_scores.Add(new RankScoreMap { rank = 42, score = 0});
+            //rank_scores.Add(new RankScoreMap { rank = 43, score = 0});
         }
-        public int[] rank_scores {get; set;}
-        public int num_ranks {get => rank_scores.Length; set { throw new System.InvalidOperationException(); } }
+        public List<RankScoreMap> rank_scores {get; set;}
+        public int num_ranks {get => rank_scores.Count; set { throw new System.InvalidOperationException(); } }
 
         public int GetRankByScore(int score) {
             int last_rank = 0;
-            for(var i=0;i<num_ranks;i++) {
-                if(score >= rank_scores[i] && rank_scores[i] != 0) {
-                    last_rank = i;
-                }
+            foreach(var item in rank_scores) {
+                if(score >= item.score && last_rank < item.rank)
+                    last_rank = item.rank;
             }
+
             return last_rank;
         }
     }
