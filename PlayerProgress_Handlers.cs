@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 namespace BF2142.SnapshotProcessor {
     public static class PlayerProgress_Handlers {
 
-        private const int MAX_PROGRESS_ELEMENTS = 50; //XXX: make this configurable
+        private const int MAX_PROGRESS_ELEMENTS = 25; //XXX: make this configurable
         private const string PLAYER_PROGRESS_BASEKEY = "player_progress_";
         public static async Task PerformComputations(BF2142Snapshot server_snapshot, BF2142PlayerSnapshot gameserverSnapshot, BF2142PlayerSnapshot currentPlayerInfo, ProcessorConfiguration processorConfig, IMongoCollection<BsonDocument> collection)
         {
@@ -60,7 +60,7 @@ namespace BF2142.SnapshotProcessor {
                 
             };
             dataValue["$each"] = eachValue;
-            dataValue["$slice"] = new BsonInt32(-MAX_PROGRESS_ELEMENTS);
+            dataValue["$slice"] = new BsonInt32(MAX_PROGRESS_ELEMENTS);
 
             var sortValue = new BsonDocument {
 
