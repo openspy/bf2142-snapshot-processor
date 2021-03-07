@@ -37,6 +37,23 @@ namespace BF2142.SnapshotProcessor {
             await PerformPlayerInfoHandling(snapshot.profileid); //insert into "base", "ply" etc pages   
 
             await PerformPlayerProgressHandling(server_snapshot, snapshot);
+
+            await PerformAwardHandling(server_snapshot, snapshot);
+        }
+        private async Task PerformAwardHandling(BF2142Snapshot server_snapshot, BF2142PlayerSnapshot snapshot) {
+            var searchRequest = new BsonDocument();
+            searchRequest.Add(new BsonElement("gameid", new BsonInt32(_processorConfig.gameid)));
+            searchRequest.Add(new BsonElement("profileid", new BsonInt32(snapshot.profileid)));
+            searchRequest.Add(new BsonElement("pageKey", new BsonString(BASE_PAGE_KEY)));
+
+            var record = await (await _collection.FindAsync(searchRequest)).FirstOrDefaultAsync();
+            if(record != null) {
+                var data = record["data"].AsBsonDocument;
+
+                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonConvert.DeserializeObject(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot));
+                await AwardsHandler.PerformHandling(snapshot, currentSnapshot, _collection, _processorConfig);
+                
+            }
         }
         private async Task PerformPlayerProgressHandling(BF2142Snapshot server_snapshot, BF2142PlayerSnapshot snapshot) {
             var type = snapshot.GetType();

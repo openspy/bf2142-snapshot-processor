@@ -18,6 +18,7 @@ namespace BF2142.SnapshotProcessor {
         private readonly ILogger<SnapshotProcessor> _logger;
         private readonly PlayerSnapshotHandler _playerSnapshotHandler;
         public SnapshotProcessor(BF2142.SnapshotProcessor.ProcessorConfiguration processorConfig, IMongoDatabase database, IPersistentStorage persistentStorage, ILogger<SnapshotProcessor> logger, ILogger<PlayerSnapshotHandler> snapshotLogger) {
+             processorConfig.LoadDatabaseSettings(database.GetCollection<BsonDocument>("leaderboards")).Wait();
              _processorConfig = processorConfig;
              _database = database;
              _persistentStorage = persistentStorage;

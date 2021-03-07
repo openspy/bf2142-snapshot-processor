@@ -1,68 +1,116 @@
-using System.Collections.Generic;  
-namespace BF2142.SnapshotProcessor {
-    public class RankScoreMap {
-        public int rank {get; set;}
-        public int score {get; set;}
-    }
-    public class ProcessorConfiguration : QueueProcessor.ProcessorConfiguration {
-        public ProcessorConfiguration() {
-            rank_scores = new List<RankScoreMap>();
-            rank_scores.Add(new RankScoreMap {rank = 0, score = 0});
-            rank_scores.Add(new RankScoreMap { rank = 1, score = 40});
-            rank_scores.Add(new RankScoreMap { rank = 2, score = 80});
-            rank_scores.Add(new RankScoreMap { rank = 3, score = 120});
-            rank_scores.Add(new RankScoreMap { rank = 4, score = 200});
-            rank_scores.Add(new RankScoreMap { rank = 5, score = 330});
-            rank_scores.Add(new RankScoreMap { rank = 6, score = 520});
-            rank_scores.Add(new RankScoreMap { rank = 7, score = 750});
-            rank_scores.Add(new RankScoreMap { rank = 8, score = 1050});
-            rank_scores.Add(new RankScoreMap { rank = 9, score = 1400});
-            rank_scores.Add(new RankScoreMap { rank = 10, score = 1800});
-            rank_scores.Add(new RankScoreMap { rank = 11, score = 2250});
-            rank_scores.Add(new RankScoreMap { rank = 12, score = 2850});
-            rank_scores.Add(new RankScoreMap { rank = 13, score = 3550});
-            rank_scores.Add(new RankScoreMap { rank = 14, score = 4400});
-            rank_scores.Add(new RankScoreMap { rank = 15, score = 5300});
-            rank_scores.Add(new RankScoreMap { rank = 16, score = 6250});
-            rank_scores.Add(new RankScoreMap { rank = 17, score = 7250});
-            rank_scores.Add(new RankScoreMap { rank = 18, score = 8250});
-            rank_scores.Add(new RankScoreMap { rank = 19, score = 9300});
-            rank_scores.Add(new RankScoreMap { rank = 20, score = 10400});
-            rank_scores.Add(new RankScoreMap { rank = 21, score = 11550});
-            rank_scores.Add(new RankScoreMap { rank = 22, score = 12700});
-            rank_scores.Add(new RankScoreMap { rank = 23, score = 14000});
-            rank_scores.Add(new RankScoreMap { rank = 24, score = 15300});
-            rank_scores.Add(new RankScoreMap { rank = 25, score = 16700});
-            rank_scores.Add(new RankScoreMap { rank = 26, score = 18300});
-            rank_scores.Add(new RankScoreMap { rank = 27, score = 20100});
-            rank_scores.Add(new RankScoreMap { rank = 28, score = 22100});
-            rank_scores.Add(new RankScoreMap { rank = 29, score = 24200});
-            rank_scores.Add(new RankScoreMap { rank = 30, score = 26400});
-            rank_scores.Add(new RankScoreMap { rank = 31, score = 28800});
-            rank_scores.Add(new RankScoreMap { rank = 32, score = 31500});
-            rank_scores.Add(new RankScoreMap { rank = 33, score = 34200});
-            rank_scores.Add(new RankScoreMap { rank = 34, score = 37100});
-            rank_scores.Add(new RankScoreMap { rank = 35, score = 40200});
-            rank_scores.Add(new RankScoreMap { rank = 36, score = 43300});
-            rank_scores.Add(new RankScoreMap { rank = 37, score = 46900});
-            rank_scores.Add(new RankScoreMap { rank = 38, score = 50500});
-            rank_scores.Add(new RankScoreMap { rank = 39, score = 54100});
-            rank_scores.Add(new RankScoreMap { rank = 40, score = 57700});
-            rank_scores.Add(new RankScoreMap { rank = 41, score = 1000000});
-            //rank_scores.Add(new RankScoreMap { rank = 42, score = 0});
-            //rank_scores.Add(new RankScoreMap { rank = 43, score = 0});
-        }
-        public List<RankScoreMap> rank_scores {get; set;}
-        public int num_ranks {get => rank_scores.Count; set { throw new System.InvalidOperationException(); } }
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic; 
+using MongoDB.Driver;
+using MongoDB.Bson;
 
+using MongoDB.Bson.Serialization;
+namespace BF2142.SnapshotProcessor {
+    public class RankScoreItem {
+        public int rank {get; set;}
+        public int minScore {get; set;}
+    }
+    public class AwardConfigItem {
+        public string awardKey {get; set;}
+        public List<string> awardRules {get; set;}
+    }
+    public class AwardVariableMappingItem {
+        public string type {get; set;}
+        public List<string> variables {get; set;}
+
+        public bool IsScoreVariable {get => type.Equals("score_variable"); set { } }
+        public bool IsAwardCheck {get => type.Equals("has_award"); set { } }
+    }
+    public class DatabaseSettings {
+        public List<RankScoreItem> scores {get; set;}
+        public List<AwardConfigItem> awards {get; set;}
+        public List<AwardVariableMappingItem> award_variable_mapping {get; set;}
         public int GetRankByScore(int score) {
             int last_rank = 0;
-            foreach(var item in rank_scores) {
-                if(score >= item.score && last_rank < item.rank)
+            foreach(var item in scores) {
+                if(score >= item.minScore && last_rank < item.rank)
                     last_rank = item.rank;
             }
 
             return last_rank;
+        }
+    }
+    public class ProcessorConfiguration : QueueProcessor.ProcessorConfiguration {
+        private DatabaseSettings _databaseSettings {get; set;}
+        public ProcessorConfiguration() {
+            _databaseSettings = null;
+        }
+        public List<AwardConfigItem> GetAwards() {
+            return _databaseSettings?.awards;
+        }
+        public int GetRankByScore(int score) {
+            return _databaseSettings.GetRankByScore(score);
+        }
+        public AwardVariableMappingItem GetVariableMappingItemById(int id) {
+            return _databaseSettings.award_variable_mapping[id-1];
+        }
+        public async Task LoadDatabaseSettings(IMongoCollection<BsonDocument> collection) {
+            var aggregateString = "[{$match: {gameid: " + this.gameid.ToString() +", baseKey: \"settings\"}}, {$project: {\"data\":  { $arrayElemAt: [ \"$data\", 0 ] }}}]";
+            var aggregateDocument =  BsonSerializer.Deserialize<BsonDocument[]>(aggregateString);
+
+            PipelineDefinition<BsonDocument, BsonDocument> pipeline = aggregateDocument;
+            var record = (await collection.AggregateAsync(pipeline)).FirstOrDefault();
+            if(record != null && record.Contains("data")) {
+
+                _databaseSettings = new DatabaseSettings();
+
+                var dataRecord = record["data"].AsBsonDocument;
+
+                if(dataRecord.Contains("scores")) {
+                    _databaseSettings.scores = GetScoresFromBsonDocument(dataRecord["scores"].AsBsonArray);
+                }
+                if(dataRecord.Contains("awards")) {
+                    _databaseSettings.awards = GetAwardConfigFromBsonDocument(dataRecord["awards"].AsBsonArray);
+                }
+                if(dataRecord.Contains("award_variable_mapping")) {
+                    _databaseSettings.award_variable_mapping = GetAwardMappingFromBsonDocument(dataRecord["award_variable_mapping"].AsBsonArray);
+                }
+            }
+        }
+        private List<AwardVariableMappingItem> GetAwardMappingFromBsonDocument(BsonArray award_variable_mapping) {
+            var result = new List<AwardVariableMappingItem>();
+            foreach(var item in award_variable_mapping) {
+                var mappingItem = new AwardVariableMappingItem();
+                mappingItem.type = item["type"].AsString;
+                mappingItem.variables = new List<string>();
+                var variablesArray = item["variables"].AsBsonArray;
+                foreach(var variable in variablesArray) {
+                    mappingItem.variables.Add(variable.AsString);
+                }
+                result.Add(mappingItem);
+            }
+            return result;
+        }
+        private List<RankScoreItem> GetScoresFromBsonDocument(BsonArray scores) {
+            var result = new List<RankScoreItem>();
+            foreach(var item in scores) {
+                var scoreItem = new RankScoreItem();
+                scoreItem.minScore = item["minScore"].AsInt32;
+                scoreItem.rank = item["rank"].AsInt32;
+                result.Add(scoreItem);
+            }
+            return result;
+        }
+
+        private List<AwardConfigItem> GetAwardConfigFromBsonDocument(BsonArray awards) {
+            var result = new List<AwardConfigItem>();
+            foreach(var item in awards) {
+                var scoreItem = new AwardConfigItem();
+                scoreItem.awardKey = item["awardKey"].AsString;
+                scoreItem.awardRules = new List<string>();
+                var rules = item["rules"].AsBsonArray;
+                foreach(var rule in rules) {
+                    scoreItem.awardRules.Add(rule.AsString);
+                }                
+                result.Add(scoreItem);
+            }
+            return result;
         }
     }
 }

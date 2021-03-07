@@ -35,7 +35,7 @@ namespace BF2142.SnapshotProcessor {
         [JsonProperty("ent-1")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Set)]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
-        public int has_ent_1 {get => 1; set { } }
+        public int has_bestbuy_gun {get => 1; set { } }
 
         [JsonProperty("ent-2")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Set)]
@@ -371,71 +371,71 @@ namespace BF2142.SnapshotProcessor {
 
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("kdths-0")]
-        public int deaths_as_recon;  //+ => deads as Recon
+        public int deaths_as_recon {get; set; }  //+ => deads as Recon
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("kdths-1")]
-        public int deaths_as_assault;  //+ => deads as Assault
+        public int deaths_as_assault {get; set; }  //+ => deads as Assault
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("kdths-2")]
-        public int deaths_as_engineer;  //+ => deads as Engineer
+        public int deaths_as_engineer {get; set; }  //+ => deads as Engineer
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("kdths-3")]
-        public int deaths_as_support;  //+ => deads as Support
+        public int deaths_as_support {get; set; }  //+ => deads as Support
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("kkls-0")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
 
-        public int kills_as_recon;  //+ => Kills As Recon
+        public int kills_as_recon {get; set; }  //+ => Kills As Recon
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("kkls-1")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
 
-        public int kills_as_assault;  //+ => Kills As Assault
+        public int kills_as_assault {get; set; }  //+ => Kills As Assault
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("kkls-2")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
 
-        public int kills_as_engineer;  //+ => Kills As Engineer
+        public int kills_as_engineer {get; set; }  //+ => Kills As Engineer
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("kkls-3")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
 
-        public int kills_as_support;  //+ => Kills As Support
+        public int kills_as_support {get; set; }  //+ => Kills As Support
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("ktt-0")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
 
-        public int time_as_recon;   //+ => Time As Recon
+        public int time_as_recon {get; set; }   //+ => Time As Recon
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("ktt-1")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
 
-        public int time_as_assault;   //+ => Time As Assault
+        public int time_as_assault {get; set; }   //+ => Time As Assault
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("ktt-2")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
 
-        public int time_as_engineer;   //+ => Time As Engineer
+        public int time_as_engineer {get; set; }   //+ => Time As Engineer
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("ktt-3")]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
 
-        public int time_as_support;   //+ => Time As Support
+        public int time_as_support {get; set; }   //+ => Time As Support
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonProperty("etp-3")]
@@ -443,7 +443,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
 
-        public int time_cloaked; //+ => Time cloaked
+        public int time_cloaked {get; set; } //+ => Time cloaked
 
         #endregion
     
@@ -2210,6 +2210,7 @@ namespace BF2142.SnapshotProcessor {
             public string hostname {get; set;}
             public string mapname {get; set;}
             public int maxplayers {get; set;}
+            [JsonProperty("gm")]
             public int gamemode {get; set;}
 
             [JsonProperty("win")]
