@@ -37,7 +37,7 @@ namespace BF2142.SnapshotProcessor {
         }
     }
     public class ProcessorConfiguration : QueueProcessor.ProcessorConfiguration {
-        private DatabaseSettings _databaseSettings {get; set;}
+        public DatabaseSettings _databaseSettings {get; set;} //exposed for testing
         public ProcessorConfiguration() {
             _databaseSettings = null;
         }

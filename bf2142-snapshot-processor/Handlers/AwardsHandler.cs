@@ -16,7 +16,7 @@ namespace BF2142.SnapshotProcessor {
             var awards = processorConfig.GetAwards();
             foreach(var award in awards) {
                 if(TestAward(award, gameserverSnapshot, playerInfoSnapshot, processorConfig)) {
-                    await AwardAward(award, playerInfoSnapshot.profileid);
+                    await AwardAward(award, playerInfoSnapshot.profileid, collection);
                 }
             }
         }
@@ -36,7 +36,7 @@ namespace BF2142.SnapshotProcessor {
 
             float required_accumulator = 0.0f;
             if(!float.TryParse(splitRules[3].Trim(), out required_accumulator)) {
-                return false;
+                return true; //the game seems to skip these
             }
 
             AwardVariableMappingItem mapping = null;
@@ -76,6 +76,8 @@ namespace BF2142.SnapshotProcessor {
                 if(accum >= required_accumulator) {
                     return true;
                 }
+            } else if (mapping.IsAwardCheck) {
+                return true; //xxx: code this!
             }
             return false;
         }
@@ -99,8 +101,16 @@ namespace BF2142.SnapshotProcessor {
             }
             return v;
         }
-        static Task AwardAward(AwardConfigItem award, int profileid) {
-            return Task.CompletedTask;
+        static async Task AwardAward(AwardConfigItem award, int profileid, IMongoCollection<BsonDocument> collection) {
+
+            var set = new BsonDocument();
+            set["$set"] = new BsonDocument("awardName", new BsonString(award.awardKey));
+
+            var searchRequest = new BsonDocument();
+            //searchRequest.Add(new BsonElement("_id", new BsonObjectId(new ObjectId(snapshots._id))));
+
+            await collection.UpdateOneAsync(searchRequest, set);
+            //throw new NotImplementedException();
         }
     }
 }

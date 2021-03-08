@@ -24,9 +24,15 @@ namespace BF2142.SnapshotProcessor {
             switch(currentPlayerInfo.team) {
                 case 1: //PAC
                     currentPlayerInfo.attp_one++; //increment total PAC plays
+                    if(gameserverSnapshot.kill_streak > currentPlayerInfo.best_kill_streak_pac) {
+                        currentPlayerInfo.best_kill_streak_pac = gameserverSnapshot.kill_streak;
+                    }
                 break;
                 case 2: //EU
                     currentPlayerInfo.attp_zero++; //incrmenet total EU plays
+                    if(gameserverSnapshot.kill_streak > currentPlayerInfo.best_kill_streak_eu) {
+                        currentPlayerInfo.best_kill_streak_eu = gameserverSnapshot.kill_streak;
+                    }
                 break;
             }
             if(server_snapshot.game_properties.winning_team == gameserverSnapshot.team) {

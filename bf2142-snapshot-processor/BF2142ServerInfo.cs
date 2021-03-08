@@ -1,5 +1,67 @@
 using Newtonsoft.Json;
 namespace BF2142.SnapshotProcessor {
+    public class BF2142Vehicle {
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vdstry")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicles_destroyed { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vdths")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_deaths { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vkls")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_kills { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vrkls")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_r_kills { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vtp")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_total_points { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vbf")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_bf { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vbh")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_bh { get; set; }
+    }
+    public class BF2142Weapon {
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+        [JsonProperty("wdths")]
+        [PlayerInfoOutputPageAttribute(PageName = "wep")]
+        public int weapon_deaths { get; set; }
+
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+        [JsonProperty("wkls")]
+        [PlayerInfoOutputPageAttribute(PageName = "wep")]
+        public int weapon_kills { get; set; }
+
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+        [JsonProperty("wtp")]
+        [PlayerInfoOutputPageAttribute(PageName = "wep")]
+        public int weapon_total_points { get; set; }
+
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+        [JsonProperty("wbf")]
+        [PlayerInfoOutputPageAttribute(PageName = "wep")]
+        public int weapon_bf { get; set; }
+
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+        [JsonProperty("wbh")]
+        [PlayerInfoOutputPageAttribute(PageName = "wep")]
+        public int weapon_bh { get; set; }
+    }
     public class BF2142PlayerSnapshot {
 
         [JsonProperty("pid")]
@@ -558,6 +620,22 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
         public double attp_one {get; set;}
+
+        [JsonProperty("bksgpm-0")]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
+        public double best_kill_streak_pac {get; set;}
+
+        [JsonProperty("bksgpm-1")]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
+        public double best_kill_streak_eu {get; set;}
+
+        [JsonProperty("kgpm-0")]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
+        public double total_kills_pac {get; set;}
+
+        [JsonProperty("kgpm-1")]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
+        public double total_kills_eu {get; set;}
 
         [JsonProperty("win")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)] //this property is "insecure" because the server could send win: 2000 and increment by 2x, should be capped at 1
@@ -1121,6 +1199,76 @@ namespace BF2142.SnapshotProcessor {
             [JsonProperty("vbh-13")]
             [PlayerInfoOutputPageAttribute(PageName = "veh")]
             public int vehicle_bh_13 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vdstry-14")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicles_destroyed_14 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vdths-14")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_deaths_14 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vkls-14")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_kills_14 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vrkls-14")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_r_kills_14 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vtp-14")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_total_points_14 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vbf-14")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_bf_14 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vbh-14")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_bh_14 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vdstry-15")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicles_destroyed_15 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vdths-15")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_deaths_15 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vkls-15")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_kills_15 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vrkls-15")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_r_kills_15 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vtp-15")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_total_points_15 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vbf-15")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_bf_15 { get; set; }
+
+            [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
+            [JsonProperty("vbh-15")]
+            [PlayerInfoOutputPageAttribute(PageName = "veh")]
+            public int vehicle_bh_15 { get; set; }
         #endregion
     
         #region Weapon Variables
