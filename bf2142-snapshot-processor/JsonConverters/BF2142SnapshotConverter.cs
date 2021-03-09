@@ -58,6 +58,28 @@ namespace BF2142SnapshotProcessor.JsonConverters {
             vehicleVariableProperty.SetValue(vehicleInstance, value);
         }
 
+        private void handlePlayerWeaponKey(ref Utf8JsonReader reader, JsonSerializerOptions options, string propertyName, BF2142PlayerSnapshot snapshot, int weaponId) { 
+            var type = snapshot.GetType();
+            var props = type.GetProperties();
+
+            var weaponProperty = props.Where(g => g.GetCustomAttributes(false).Where(x => x.GetType() == typeof(WeaponAttribute) && ((WeaponAttribute)x).WeaponId == weaponId).FirstOrDefault() != null).FirstOrDefault();
+
+            var weaponType = typeof(BF2142Weapon);
+
+            var weaponProps = weaponType.GetProperties();
+            var weaponVariableProperty = weaponProps.Where(g => g.GetCustomAttributes(false).Where(x => x.GetType() == typeof(JsonPropertyNameAttribute) && ((JsonPropertyNameAttribute)x).Name .Equals(propertyName)).FirstOrDefault() != null).FirstOrDefault();
+
+
+            var weaponInstance = weaponProperty.GetValue(snapshot);
+            if(weaponInstance == null) {
+                weaponInstance = new BF2142Weapon();
+                weaponProperty.SetValue(snapshot, weaponInstance);
+            }
+
+            var value = ReadProperty(ref reader, options, weaponVariableProperty.PropertyType);
+            weaponVariableProperty.SetValue(weaponInstance, value);
+        }
+
         private object ReadProperty(ref Utf8JsonReader reader, JsonSerializerOptions options, Type propertyType) {
             if(!reader.Read()) {
                 throw new JsonException();
@@ -104,10 +126,12 @@ namespace BF2142SnapshotProcessor.JsonConverters {
                 } else {
                     var weaponMatch = Regex.Match(propertyName, @"w(\w+)-(\d+)_(\d+)");
                     if(weaponMatch.Success) {
-                        reader.Read(); //skip weapons for now...
-                        return;
+                        if(int.TryParse(propertyMatchInfo.Groups.Values.ElementAt(2).Value, out int weaponId)) {
+                            var weaponPropertyName = weaponMatch.Groups.Values.ElementAt(1).Value;
+                            handlePlayerWeaponKey(ref reader, options, weaponPropertyName, player_snapshot, weaponId);
+                            return;
+                        }
                     }
-                    
                 }
 
                 var type = typeof(BF2142PlayerSnapshot);

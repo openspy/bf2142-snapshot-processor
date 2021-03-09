@@ -5,29 +5,34 @@ namespace BF2142.SnapshotProcessor {
 
     public class BF2142Weapon {
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
-        [JsonPropertyName("wdths")]
+        [JsonPropertyName("dths")]
         [PlayerInfoOutputPageAttribute(PageName = "wep")]
         public int deaths { get; set; }
 
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
-        [JsonPropertyName("wkls")]
+        [JsonPropertyName("kls")]
         [PlayerInfoOutputPageAttribute(PageName = "wep")]
         public int kills { get; set; }
 
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
-        [JsonPropertyName("wtp")]
+        [JsonPropertyName("tp")]
         [PlayerInfoOutputPageAttribute(PageName = "wep")]
         public int total_points { get; set; }
 
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
-        [JsonPropertyName("wbf")]
+        [JsonPropertyName("bf")]
         [PlayerInfoOutputPageAttribute(PageName = "wep")]
         public int bullets_fired { get; set; }
 
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
-        [JsonPropertyName("wbh")]
+        [JsonPropertyName("bh")]
         [PlayerInfoOutputPageAttribute(PageName = "wep")]
         public int bullets_hit { get; set; }
+
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
+        [JsonPropertyName("accu")]
+        [PlayerInfoOutputPageAttribute(PageName = "wep")]
+        public float accuracy { get; set; }
     }
     public class BF2142Vehicle {
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
@@ -906,7 +911,7 @@ namespace BF2142.SnapshotProcessor {
         [Vehicle(VehicleId = 15)]
         public BF2142Vehicle vehicle_15 {get; set;}
         #endregion
-        #region 
+
         #region Weapon Variables
         [Weapon(WeaponId = 0)]
         public BF2142Weapon weapon_0 {get; set;}
@@ -1047,11 +1052,6 @@ namespace BF2142.SnapshotProcessor {
             player_snapshots = new Hashtable();
             game_properties = new GameProperties();
         }
-
-        //inheritied properties
-        public System.DateTime created {get; set; }
-        public int profileId {get; set; }
-        //
         public class GameProperties {
             public string hostname {get; set;}
             public string mapname {get; set;}
