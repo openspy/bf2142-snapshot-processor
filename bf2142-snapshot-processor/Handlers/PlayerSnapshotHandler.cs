@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 using MongoDB.Bson.Serialization;
 using Microsoft.Extensions.Logging;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace BF2142.SnapshotProcessor {
     public class PlayerSnapshotHandler {
@@ -50,7 +51,7 @@ namespace BF2142.SnapshotProcessor {
             if(record != null) {
                 var data = record["data"].AsBsonDocument;
 
-                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonConvert.DeserializeObject(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot));
+                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonSerializer.Deserialize(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot));
                 await AwardsHandler.PerformHandling(snapshot, currentSnapshot, _collection, _processorConfig);
                 
             }
@@ -68,7 +69,7 @@ namespace BF2142.SnapshotProcessor {
             if(record != null) {
                 var data = record["data"].AsBsonDocument;
 
-                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonConvert.DeserializeObject(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot));
+                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonSerializer.Deserialize(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot));
                 await PlayerProgress_Handlers.PerformComputations(server_snapshot, snapshot, currentSnapshot, _processorConfig, _collection);
             }
         }
@@ -92,14 +93,14 @@ namespace BF2142.SnapshotProcessor {
             if(record != null) {
                 var data = record["data"].AsBsonDocument;
 
-                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonConvert.DeserializeObject(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot));
+                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonSerializer.Deserialize(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot));
                 PlayerInfo_ComputedHandler.PerformComputations(server_snapshot, snapshot, currentSnapshot, _processorConfig);
 
                 foreach(var prop in props) {
                     var attrs = prop.GetCustomAttributes(false);
 
-                    var jsonHandler = (Newtonsoft.Json.JsonPropertyAttribute)attrs.Where(g => g.GetType() == typeof(Newtonsoft.Json.JsonPropertyAttribute)).FirstOrDefault();
-                    var propName = jsonHandler?.PropertyName ?? prop.Name;
+                    var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
+                    var propName = jsonHandler?.Name ?? prop.Name;
                     propName = setNamePrefix + propName;
                     StatsHandlerAttribute statsHandler = (StatsHandlerAttribute)attrs.Where(g => g.GetType() == typeof(StatsHandlerAttribute)).FirstOrDefault();
                     if(statsHandler != null) {
@@ -140,8 +141,8 @@ namespace BF2142.SnapshotProcessor {
             foreach(var prop in props) {
                 var attrs = prop.GetCustomAttributes(false);
 
-                var jsonHandler = (Newtonsoft.Json.JsonPropertyAttribute)attrs.Where(g => g.GetType() == typeof(Newtonsoft.Json.JsonPropertyAttribute)).FirstOrDefault();
-                var propName = jsonHandler?.PropertyName ?? prop.Name;
+                var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
+                var propName = jsonHandler?.Name ?? prop.Name;
                 propName = incNamePrefix + propName;
                 StatsHandlerAttribute statsHandler = (StatsHandlerAttribute)attrs.Where(g => g.GetType() == typeof(StatsHandlerAttribute)).FirstOrDefault();
                 if(statsHandler != null) {
@@ -181,8 +182,8 @@ namespace BF2142.SnapshotProcessor {
             foreach(var prop in props) {
                 var attrs = prop.GetCustomAttributes(false);
 
-                var jsonHandler = (Newtonsoft.Json.JsonPropertyAttribute)attrs.Where(g => g.GetType() == typeof(Newtonsoft.Json.JsonPropertyAttribute)).FirstOrDefault();
-                var propName = jsonHandler?.PropertyName ?? prop.Name;
+                var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
+                var propName = jsonHandler?.Name ?? prop.Name;
                 propName = incNamePrefix + propName;
                 StatsHandlerAttribute statsHandler = (StatsHandlerAttribute)attrs.Where(g => g.GetType() == typeof(StatsHandlerAttribute)).FirstOrDefault();
                 if(statsHandler != null) {
@@ -225,8 +226,8 @@ namespace BF2142.SnapshotProcessor {
             foreach(var prop in props) {
                 var attrs = prop.GetCustomAttributes(false);
 
-                var jsonHandler = (Newtonsoft.Json.JsonPropertyAttribute)attrs.Where(g => g.GetType() == typeof(Newtonsoft.Json.JsonPropertyAttribute)).FirstOrDefault();
-                var propName = jsonHandler?.PropertyName ?? prop.Name;
+                var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
+                var propName = jsonHandler?.Name ?? prop.Name;
                 propName = incNamePrefix + propName;
                 StatsHandlerAttribute statsHandler = (StatsHandlerAttribute)attrs.Where(g => g.GetType() == typeof(StatsHandlerAttribute)).FirstOrDefault();
                 if(statsHandler != null) {
@@ -290,10 +291,10 @@ namespace BF2142.SnapshotProcessor {
 
             foreach(var prop in props) {
                 var attrs = prop.GetCustomAttributes(false);
-                var jsonHandler = (Newtonsoft.Json.JsonPropertyAttribute)attrs.Where(g => g.GetType() == typeof(Newtonsoft.Json.JsonPropertyAttribute)).FirstOrDefault();
+                var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
 
                 var playerInfoOutput = (PlayerInfoOutputPageAttribute)attrs.Where(g => g.GetType() == typeof(PlayerInfoOutputPageAttribute) && ((PlayerInfoOutputPageAttribute)g).PageName.Equals(name)).FirstOrDefault();
-                var propName = jsonHandler?.PropertyName ?? prop.Name;
+                var propName = jsonHandler?.Name ?? prop.Name;
                 if(playerInfoData.Contains(propName) && playerInfoOutput != null) {
                     setData[propName] = playerInfoData[propName];
                 }

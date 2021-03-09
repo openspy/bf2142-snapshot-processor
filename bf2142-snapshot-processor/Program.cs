@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using QueueProcessor;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BF2142.SnapshotProcessor
 {
@@ -15,6 +16,9 @@ namespace BF2142.SnapshotProcessor
             }
             return dict;
         }
+        private static void DIHook(IServiceCollection collection) {
+
+        }
         static void Main(string[] args)
         {
             var config = getConfigDictionary(args);
@@ -22,7 +26,7 @@ namespace BF2142.SnapshotProcessor
             processorConfig.gameid = int.Parse(config["GameId"]);
             processorConfig.processorDataType = typeof(QueueProcessor.Utils.Snapshot<BF2142Snapshot>);
 
-            QueueProcessor.Init.RunSnapshotProcessor(typeof(BF2142.SnapshotProcessor.SnapshotProcessor), typeof(BF2142.SnapshotProcessor.ProcessorConfiguration), processorConfig);
+            QueueProcessor.Init.RunSnapshotProcessor(typeof(BF2142.SnapshotProcessor.SnapshotProcessor), typeof(BF2142.SnapshotProcessor.ProcessorConfiguration), processorConfig, DIHook);
         }
     }
 }

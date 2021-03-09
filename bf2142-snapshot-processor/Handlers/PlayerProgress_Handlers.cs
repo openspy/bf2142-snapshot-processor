@@ -1,15 +1,8 @@
 using System;
-using System.Threading;
-using System.Collections.Generic; 
-using QueueProcessor;
-using QueueProcessor.Utils;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization;
-using Microsoft.Extensions.Logging;
 using System.Linq;
-using Newtonsoft.Json;
 namespace BF2142.SnapshotProcessor {
     public static class PlayerProgress_Handlers {
 
@@ -139,9 +132,7 @@ namespace BF2142.SnapshotProcessor {
         }
 
         static int GetDateFromRecord(BF2142Snapshot server_snapshot) {
-            var date = (int)Math.Floor(server_snapshot.game_properties.map_end_time);
-            System.DateTime dtDateTime = DateTime.UnixEpoch;
-            dtDateTime = dtDateTime.AddSeconds( date ).ToLocalTime();
+            System.DateTime dtDateTime = server_snapshot.game_properties.map_end_time;
             return (Int32)(dtDateTime.Date.Subtract(DateTime.UnixEpoch)).TotalSeconds;
         }
     }

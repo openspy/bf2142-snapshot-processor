@@ -9,11 +9,10 @@ using System.Threading.Tasks;
 using MongoDB.Bson.Serialization;
 using Microsoft.Extensions.Logging;
 using System.Linq;
-using Newtonsoft.Json;
 namespace BF2142.SnapshotProcessor {
     public static class PlayerInfo_ComputedHandler {
         public static void PerformComputations(BF2142Snapshot server_snapshot, BF2142PlayerSnapshot gameserverSnapshot, BF2142PlayerSnapshot currentPlayerInfo, ProcessorConfiguration processorConfig) {
-            if(currentPlayerInfo.deaths > 0) {
+            /*if(currentPlayerInfo.deaths > 0) {
                 currentPlayerInfo.kill_death_ratio = (double)currentPlayerInfo.kills / (double)currentPlayerInfo.deaths;
             }
 
@@ -63,7 +62,7 @@ namespace BF2142.SnapshotProcessor {
             if(newRank > currentPlayerInfo.rank) {
                 currentPlayerInfo.rank = newRank;
                 currentPlayerInfo.rank_changed = 1;
-            }
+            }*/
         }
     }
 }

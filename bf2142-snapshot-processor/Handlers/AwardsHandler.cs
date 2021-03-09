@@ -1,15 +1,9 @@
 using System;
-using System.Threading;
-using System.Collections.Generic; 
-using QueueProcessor;
-using QueueProcessor.Utils;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization;
-using Microsoft.Extensions.Logging;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 namespace BF2142.SnapshotProcessor {
     public static class AwardsHandler {
         static public async Task PerformHandling(BF2142PlayerSnapshot gameserverSnapshot, BF2142PlayerSnapshot playerInfoSnapshot, IMongoCollection<BsonDocument> collection, BF2142.SnapshotProcessor.ProcessorConfiguration processorConfig) {
@@ -86,9 +80,9 @@ namespace BF2142.SnapshotProcessor {
             var type = snapshot.GetType();
             var props = type.GetProperties();
             foreach(var variable in mapping.variables) {
-                var prop = props.Where(g => g.GetCustomAttributes(false).Where(x => x.GetType() == typeof(Newtonsoft.Json.JsonPropertyAttribute)
+                var prop = props.Where(g => g.GetCustomAttributes(false).Where(x => x.GetType() == typeof(JsonPropertyNameAttribute)
                 
-                && ((Newtonsoft.Json.JsonPropertyAttribute)x).PropertyName.Equals(variable)
+                && ((JsonPropertyNameAttribute)x).Name.Equals(variable)
 
                 ).FirstOrDefault() != null).FirstOrDefault();
 

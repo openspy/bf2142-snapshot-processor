@@ -1,12 +1,10 @@
 using System;
 using System.Threading;
 using System.Collections.Generic; 
-using QueueProcessor;
 using QueueProcessor.Utils;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace BF2142.SnapshotProcessor {
@@ -27,7 +25,8 @@ namespace BF2142.SnapshotProcessor {
         }
         private async Task HandleSnapshot(BF2142Snapshot snapshot) {
             foreach(var player_snapshot in snapshot.player_snapshots) {
-                await _playerSnapshotHandler.HandlePlayerSnapshot(snapshot, player_snapshot);
+                var entry = (System.Collections.DictionaryEntry)player_snapshot;
+                await _playerSnapshotHandler.HandlePlayerSnapshot(snapshot, (BF2142PlayerSnapshot)entry.Value);
             }
         }
         public async Task ProcessSnapshot(object snapshot_data) {
@@ -38,9 +37,8 @@ namespace BF2142.SnapshotProcessor {
             using(CancellationTokenSource cancelSignal = new CancellationTokenSource()) {
                 try {
                     var tasks = new List<Task>();
-                    foreach(var snapshot in snapshots.snapshots) {
-                        tasks.Add(HandleSnapshot(snapshot));
-
+                    foreach(var snapshot in snapshots.updates) {
+                        tasks.Add(HandleSnapshot(snapshot.data));
                     }
                     Task.WaitAll(tasks.ToArray(), cancelSignal.Token);
 
