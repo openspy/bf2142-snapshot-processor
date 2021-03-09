@@ -34,12 +34,12 @@ namespace BF2142.SnapshotProcessor {
             await PerformGreaterThans(snapshot);
             await PerformSets(snapshot);
 
-            await PerformComputedHandling(server_snapshot, snapshot);
+            //await PerformComputedHandling(server_snapshot, snapshot);
             await PerformPlayerInfoHandling(snapshot.profileid); //insert into "base", "ply" etc pages   
 
-            await PerformPlayerProgressHandling(server_snapshot, snapshot);
+            //await PerformPlayerProgressHandling(server_snapshot, snapshot);
 
-            await PerformAwardHandling(server_snapshot, snapshot);
+            //await PerformAwardHandling(server_snapshot, snapshot);
         }
         private async Task PerformAwardHandling(BF2142Snapshot server_snapshot, BF2142PlayerSnapshot snapshot) {
             var searchRequest = new BsonDocument();
@@ -97,24 +97,7 @@ namespace BF2142.SnapshotProcessor {
                 PlayerInfo_ComputedHandler.PerformComputations(server_snapshot, snapshot, currentSnapshot, _processorConfig);
 
                 foreach(var prop in props) {
-                    var attrs = prop.GetCustomAttributes(false);
-
-                    var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
-                    var propName = jsonHandler?.Name ?? prop.Name;
-                    propName = setNamePrefix + propName;
-                    StatsHandlerAttribute statsHandler = (StatsHandlerAttribute)attrs.Where(g => g.GetType() == typeof(StatsHandlerAttribute)).FirstOrDefault();
-                    if(statsHandler != null) {
-                        if(statsHandler.IsComputed) {
-                            var value = prop.GetValue(currentSnapshot);                        
-                            if(int.TryParse(value.ToString(), out int intValue)) {
-                                setRecord[propName] = new BsonInt32(intValue);
-                            } else if(double.TryParse(value.ToString(), out double doubleValue)) {
-                                setRecord[propName] = new BsonDouble(doubleValue);
-                            } else {
-                                setRecord[propName] = new BsonString(value.ToString());
-                            }                        
-                        }                        
-                    }
+                    HandleProperty(prop, setRecord, setNamePrefix, currentSnapshot, false, false, true, false);
                 }
 
                 var updateRecord = new BsonDocument {};
@@ -139,24 +122,7 @@ namespace BF2142.SnapshotProcessor {
             var incNamePrefix = "data.";
 
             foreach(var prop in props) {
-                var attrs = prop.GetCustomAttributes(false);
-
-                var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
-                var propName = jsonHandler?.Name ?? prop.Name;
-                propName = incNamePrefix + propName;
-                StatsHandlerAttribute statsHandler = (StatsHandlerAttribute)attrs.Where(g => g.GetType() == typeof(StatsHandlerAttribute)).FirstOrDefault();
-                if(statsHandler != null) {
-                    if(statsHandler.IsIncrement) {
-                        var value = prop.GetValue(snapshot);                        
-                        if(int.TryParse(value.ToString(), out int intValue)) {
-                            incRecord[propName] = new BsonInt32(intValue);
-                        } else if(double.TryParse(value.ToString(), out double doubleValue)) {
-                            incRecord[propName] = new BsonDouble(doubleValue);
-                        } else {
-                            incRecord[propName] = new BsonString(value.ToString());
-                        }                        
-                    }                        
-                }
+                HandleProperty(prop, incRecord, incNamePrefix, snapshot, true, false, false, false);
             }
             var updateRecord = new BsonDocument {};
             updateRecord["$inc"] = incRecord;
@@ -180,27 +146,7 @@ namespace BF2142.SnapshotProcessor {
             var incNamePrefix = "data.";
 
             foreach(var prop in props) {
-                var attrs = prop.GetCustomAttributes(false);
-
-                var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
-                var propName = jsonHandler?.Name ?? prop.Name;
-                propName = incNamePrefix + propName;
-                StatsHandlerAttribute statsHandler = (StatsHandlerAttribute)attrs.Where(g => g.GetType() == typeof(StatsHandlerAttribute)).FirstOrDefault();
-                if(statsHandler != null) {
-                    if(statsHandler.IsGreaterEqual) {
-
-                        var value = prop.GetValue(snapshot);
-                        
-                        if(int.TryParse(value.ToString(), out int intValue)) {
-                            incRecord[propName] = new BsonInt32(intValue);
-                        } else if(double.TryParse(value.ToString(), out double doubleValue)) {
-                            incRecord[propName] = new BsonDouble(doubleValue);
-                        } else {
-                            incRecord[propName] = new BsonString(value.ToString());
-                        }                        
-                    }
-                        
-                }
+                HandleProperty(prop, incRecord, incNamePrefix, snapshot, false, false, false, true);
             }
             var updateRecord = new BsonDocument {};
             updateRecord["$max"] = incRecord;
@@ -224,28 +170,7 @@ namespace BF2142.SnapshotProcessor {
             var incNamePrefix = "data.";
 
             foreach(var prop in props) {
-                var attrs = prop.GetCustomAttributes(false);
-
-                var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
-                var propName = jsonHandler?.Name ?? prop.Name;
-                propName = incNamePrefix + propName;
-                StatsHandlerAttribute statsHandler = (StatsHandlerAttribute)attrs.Where(g => g.GetType() == typeof(StatsHandlerAttribute)).FirstOrDefault();
-                if(statsHandler != null) {
-                    if(statsHandler.IsSet) {
-
-                        var value = prop.GetValue(snapshot);
-                        
-                        if(int.TryParse(value.ToString(), out int intValue)) {
-                            incRecord[propName] = new BsonInt32(intValue);
-                        } else if(double.TryParse(value.ToString(), out double doubleValue)) {
-                            incRecord[propName] = new BsonDouble(doubleValue);
-                        } else {
-                            incRecord[propName] = new BsonString(value.ToString());
-                        }
-                        
-                    }
-                        
-                }
+                HandleProperty(prop, incRecord, incNamePrefix, snapshot, false, true, false, false);
             }
             var updateRecord = new BsonDocument {};
             updateRecord["$set"] = incRecord;
@@ -277,10 +202,130 @@ namespace BF2142.SnapshotProcessor {
                 string[] pages = new string[] {"base","ply","titan","wrk","com","ovr","comp", "veh", "wep"};
                 foreach(var page in pages) {
                     await PerformPlayerInfoHandlingForType(profileid, page, data);
+                    await PerformPlayerInfoHandlingForType_Vehicles(profileid, page, data);
+                    await PerformPlayerInfoHandlingForType_Weapons(profileid, page, data);
                 }
 
             }
         }
+
+        #region Player Info - Vehicle Handling
+        private Task PerformPlayerInfoHandlingForType_WriteVehicleToDocument(BsonDocument playerInfoData, BsonDocument setData, int vehicleIndex, string pageName) {
+            var type = typeof(BF2142Vehicle);
+
+            var props = type.GetProperties();
+
+            var prefix = "v";
+
+            var suffix = "-" + vehicleIndex.ToString();
+
+            foreach(var prop in props) {
+                var attrs = prop.GetCustomAttributes(false);
+                var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
+
+                var playerInfoOutput = (PlayerInfoOutputPageAttribute)attrs.Where(g => g.GetType() == typeof(PlayerInfoOutputPageAttribute) && ((PlayerInfoOutputPageAttribute)g).PageName.Equals(pageName)).FirstOrDefault();
+
+                var propName = prefix + (jsonHandler?.Name ?? prop.Name) + suffix;
+
+                if(playerInfoData.Contains(propName) && playerInfoOutput != null) {
+                    setData["data." + propName] = playerInfoData[propName];
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+        private async Task PerformPlayerInfoHandlingForType_Vehicles(int profileid, string name, BsonDocument playerInfoData) {
+            var key = BASE_PAGE_KEY + "_" + name;
+
+            var type = typeof(BF2142PlayerSnapshot);
+            var props = type.GetProperties();
+
+            var setData = new BsonDocument {};
+
+            foreach(var prop in props) {
+                var attrs = prop.GetCustomAttributes(false);
+
+                var vehicleAttribute = (VehicleAttribute)attrs.Where(g => g.GetType() == typeof(VehicleAttribute)).FirstOrDefault();
+                if(vehicleAttribute == null) continue;
+
+                await PerformPlayerInfoHandlingForType_WriteVehicleToDocument(playerInfoData, setData, vehicleAttribute.VehicleId, name);
+            }
+
+            var updateRecord = new BsonDocument{};
+
+            updateRecord["$set"] = setData;
+
+
+            var searchRequest = new BsonDocument();
+            searchRequest.Add(new BsonElement("gameid", new BsonInt32(_processorConfig.gameid)));
+            searchRequest.Add(new BsonElement("profileid", new BsonInt32(profileid)));
+            searchRequest.Add(new BsonElement("pageKey", new BsonString(key)));
+
+            if(setData.ElementCount > 0) {
+                await _collection.UpdateOneAsync(searchRequest, updateRecord, new UpdateOptions { IsUpsert = true});
+            }
+            
+        }
+        #endregion
+
+
+        #region Player Info - Weapon Handling
+        private Task PerformPlayerInfoHandlingForType_WriteWeaponToDocument(BsonDocument playerInfoData, BsonDocument setData, int weaponIndex, string pageName) {
+            var type = typeof(BF2142Weapon);
+
+            var props = type.GetProperties();
+
+            var prefix = "w";
+
+            var suffix = "-" + weaponIndex.ToString();
+
+            foreach(var prop in props) {
+                var attrs = prop.GetCustomAttributes(false);
+                var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
+
+                var playerInfoOutput = (PlayerInfoOutputPageAttribute)attrs.Where(g => g.GetType() == typeof(PlayerInfoOutputPageAttribute) && ((PlayerInfoOutputPageAttribute)g).PageName.Equals(pageName)).FirstOrDefault();
+
+                var propName = prefix + (jsonHandler?.Name ?? prop.Name) + suffix;
+
+                if(playerInfoData.Contains(propName) && playerInfoOutput != null) {
+                    setData["data." + propName] = playerInfoData[propName];
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+        private async Task PerformPlayerInfoHandlingForType_Weapons(int profileid, string name, BsonDocument playerInfoData) {
+            var key = BASE_PAGE_KEY + "_" + name;
+
+            var type = typeof(BF2142PlayerSnapshot);
+            var props = type.GetProperties();
+
+            var setData = new BsonDocument {};
+
+            foreach(var prop in props) {
+                var attrs = prop.GetCustomAttributes(false);
+
+                var weaponAttribute = (WeaponAttribute)attrs.Where(g => g.GetType() == typeof(WeaponAttribute)).FirstOrDefault();
+                if(weaponAttribute == null) continue;
+
+                await PerformPlayerInfoHandlingForType_WriteWeaponToDocument(playerInfoData, setData, weaponAttribute.WeaponId, name);
+            }
+
+            var updateRecord = new BsonDocument{};
+
+            updateRecord["$set"] = setData;
+
+
+            var searchRequest = new BsonDocument();
+            searchRequest.Add(new BsonElement("gameid", new BsonInt32(_processorConfig.gameid)));
+            searchRequest.Add(new BsonElement("profileid", new BsonInt32(profileid)));
+            searchRequest.Add(new BsonElement("pageKey", new BsonString(key)));
+            
+            if(setData.ElementCount > 0) {
+                await _collection.UpdateOneAsync(searchRequest, updateRecord, new UpdateOptions { IsUpsert = true});
+            }
+        }
+        #endregion
         private async Task PerformPlayerInfoHandlingForType(int profileid, string name, BsonDocument playerInfoData) {
             var key = BASE_PAGE_KEY + "_" + name;
 
@@ -291,20 +336,23 @@ namespace BF2142.SnapshotProcessor {
 
             foreach(var prop in props) {
                 var attrs = prop.GetCustomAttributes(false);
+
+                var vehicleAttribute = (VehicleAttribute)attrs.Where(g => g.GetType() == typeof(VehicleAttribute)).FirstOrDefault();
+                var weaponAttribute = (WeaponAttribute)attrs.Where(g => g.GetType() == typeof(WeaponAttribute)).FirstOrDefault();
+                if(vehicleAttribute != null || weaponAttribute != null) continue;
+
                 var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
 
                 var playerInfoOutput = (PlayerInfoOutputPageAttribute)attrs.Where(g => g.GetType() == typeof(PlayerInfoOutputPageAttribute) && ((PlayerInfoOutputPageAttribute)g).PageName.Equals(name)).FirstOrDefault();
                 var propName = jsonHandler?.Name ?? prop.Name;
                 if(playerInfoData.Contains(propName) && playerInfoOutput != null) {
-                    setData[propName] = playerInfoData[propName];
+                    setData["data." + propName] = playerInfoData[propName];
                 }
             }
 
             var updateRecord = new BsonDocument{};
 
-            var dataRecord = new BsonDocument {};
-            dataRecord["data"] = setData;
-            updateRecord["$set"] = dataRecord;
+            updateRecord["$set"] = setData;
 
 
             var searchRequest = new BsonDocument();
@@ -312,7 +360,65 @@ namespace BF2142.SnapshotProcessor {
             searchRequest.Add(new BsonElement("profileid", new BsonInt32(profileid)));
             searchRequest.Add(new BsonElement("pageKey", new BsonString(key)));
 
-            await _collection.UpdateOneAsync(searchRequest, updateRecord, new UpdateOptions { IsUpsert = true});
+            if(setData.ElementCount > 0) {
+                await _collection.UpdateOneAsync(searchRequest, updateRecord, new UpdateOptions { IsUpsert = true});
+            }
+        }
+
+
+        private void HandleProperty(System.Reflection.PropertyInfo property, BsonDocument record, string prefix, object instance,
+            bool IsIncrement, bool IsSet, bool IsComputed, bool IsGreaterEqual, string suffix = "") {
+            var attrs = property.GetCustomAttributes(false);
+
+            var vehicleAttribute = (VehicleAttribute)attrs.Where(g => g.GetType() == typeof(VehicleAttribute)).FirstOrDefault();
+            var weaponAttribute = (WeaponAttribute)attrs.Where(g => g.GetType() == typeof(WeaponAttribute)).FirstOrDefault();
+
+            if(vehicleAttribute != null) {
+                var vehicleInfo = property.GetValue(instance);
+                if(vehicleInfo != null) {
+                    var type = typeof(BF2142Vehicle);
+                    var childProps = type.GetProperties();
+
+                    var vehiclePrefix = prefix + "v";
+
+                    var vehicleSuffix = "-" + vehicleAttribute.VehicleId.ToString();
+                    foreach(var childProp in childProps) {
+                        HandleProperty(childProp, record, vehiclePrefix, vehicleInfo, IsIncrement, IsSet, IsComputed, IsGreaterEqual, vehicleSuffix);
+                    }
+                }
+                return;
+            } else if(weaponAttribute != null) {
+                var weaponInfo = property.GetValue(instance);
+                if(weaponInfo != null) {
+                    var type = typeof(BF2142Weapon);
+                    var childProps = type.GetProperties();
+
+                    var weaponPrefix = prefix + "w";
+
+                    var weaponSuffix = "-" + weaponAttribute.WeaponId.ToString();
+                    foreach(var childProp in childProps) {
+                        HandleProperty(childProp, record, weaponPrefix, weaponInfo, IsIncrement, IsSet, IsComputed, IsGreaterEqual, weaponSuffix);
+                    }
+                }
+                return;
+            }
+
+            var jsonHandler = (JsonPropertyNameAttribute)attrs.Where(g => g.GetType() == typeof(JsonPropertyNameAttribute)).FirstOrDefault();
+            var propName = jsonHandler?.Name ?? property.Name;
+            propName = prefix + propName + suffix;
+            StatsHandlerAttribute statsHandler = (StatsHandlerAttribute)attrs.Where(g => g.GetType() == typeof(StatsHandlerAttribute)).FirstOrDefault();
+            if(statsHandler != null) {
+                if((IsIncrement && statsHandler.IsIncrement) || (IsSet && statsHandler.IsSet) || (IsComputed && statsHandler.IsComputed) || (IsGreaterEqual && statsHandler.IsGreaterEqual)) {
+                    var value = property.GetValue(instance);                        
+                    if(int.TryParse(value.ToString(), out int intValue)) {
+                        record[propName] = new BsonInt32(intValue);
+                    } else if(double.TryParse(value.ToString(), out double doubleValue)) {
+                        record[propName] = new BsonDouble(doubleValue);
+                    } else {
+                        record[propName] = new BsonString(value.ToString());
+                    }                        
+                }                        
+            }
         }
         #endregion
     }
