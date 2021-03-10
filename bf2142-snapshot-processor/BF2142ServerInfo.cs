@@ -69,6 +69,11 @@ namespace BF2142.SnapshotProcessor {
         [JsonPropertyName("bh")]
         [PlayerInfoOutputPageAttribute(PageName = "veh")]
         public int bullets_hit { get; set; }
+
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
+        [JsonPropertyName("kdr")]
+        [PlayerInfoOutputPageAttribute(PageName = "veh")]
+        public double kill_death_ratio { get; set; }
     }
     public class BF2142PlayerSnapshot {
 
@@ -251,13 +256,9 @@ namespace BF2142.SnapshotProcessor {
         [JsonPropertyName("nmst")]
         public int neutralized_missle_silos {get; set; }     //+ => Neutralized Missle Silos
         
-        /*[StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
-        
-        [PlayerInfoOutputPageAttribute(PageName = "base")]
-        [PlayerInfoOutputPageAttribute(PageName = "ovr")]
-        [PlayerInfoOutputPageAttribute(PageName = "comp")]*/
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
         [JsonPropertyName("pdt")]
-        public string player_dog_tags {get; set; }      //+ => Unique Dog Tags Collected //array
+        public System.Collections.Generic.Dictionary<int, int> player_dog_tags {get; set; }      //+ => Unique Dog Tags Collected //array
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonPropertyName("pdtc")]
@@ -838,7 +839,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "com")]
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
-        public double win_loss_ratio {get; set; }
+        public double? win_loss_ratio {get; set; }
 
         [JsonPropertyName("ovaccu")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
@@ -850,7 +851,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
         [PlayerProgressOutputPageAttribute(PageName = "waccu", VariableName = "waccu")]
-        public double overall_accuracy {get; set; }
+        public double? overall_accuracy {get; set; }
 
         [JsonPropertyName("ttp")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
@@ -1089,5 +1090,10 @@ namespace BF2142.SnapshotProcessor {
         [JsonPropertyName("data")]
         public GameProperties game_properties {get; set;}
         public Hashtable player_snapshots { get; set; }
+
+        public int GetDateFromRecord() {
+            System.DateTime dtDateTime = game_properties.map_end_time;
+            return (System.Int32)(dtDateTime.Date.Subtract(System.DateTime.UnixEpoch)).TotalSeconds;
+        }
     }
 }

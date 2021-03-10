@@ -26,7 +26,7 @@ namespace BF2142.SnapshotProcessor {
             var updateDocument = GetUpdateDocument("data.$.", pageName, currentPlayerInfo);
             //try perform update
 
-            var date = GetDateFromRecord(server_snapshot);
+            var date = server_snapshot.GetDateFromRecord();
 
             if(!await PerformUpdate(pageName, gameserverSnapshot.profileid, processorConfig.gameid, date, collection, updateDocument)) {
                 var insertDocument = GetUpdateDocument("", pageName, currentPlayerInfo);
@@ -133,11 +133,6 @@ namespace BF2142.SnapshotProcessor {
             }
 
             return record;
-        }
-
-        static int GetDateFromRecord(BF2142Snapshot server_snapshot) {
-            System.DateTime dtDateTime = server_snapshot.game_properties.map_end_time;
-            return (Int32)(dtDateTime.Date.Subtract(DateTime.UnixEpoch)).TotalSeconds;
         }
     }
 }

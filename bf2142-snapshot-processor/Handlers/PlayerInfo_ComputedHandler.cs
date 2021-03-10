@@ -29,9 +29,14 @@ namespace BF2142.SnapshotProcessor {
             IncrementGamemodeKills(projectDocPhase1, server_snapshot, snapshot);
             SetGamemodeBestKillStreak(projectDocPhase1, server_snapshot, snapshot);
             SetBestScore(projectDocPhase1, snapshot);
+            SetFirstPlayTime(projectDocPhase1, server_snapshot);
+            SetLastPlayTime(projectDocPhase1, server_snapshot);
 
             AttachKDRRatio(projectDocPhase1);
             AttachOverallAccuracy(projectDocPhase1);
+            AttachVehicleKDRRatio(projectDocPhase1);
+            AttachWeaponKDRRatio(projectDocPhase1);
+            AttachWeaponAccuracyRatio(projectDocPhase1);
 
             await RunMergeAggregate(projectStatementPhase1, server_snapshot, snapshot, processorConfig, collection);
 
@@ -90,6 +95,46 @@ namespace BF2142.SnapshotProcessor {
             condStatement["$cond"] = condData;
 
             projectDocument[COMPUTED_PREFIX + "brs"] = condStatement;
+        }
+
+        private static void SetLastPlayTime(BsonDocument projectDocument, BF2142Snapshot server_snapshot) {
+            var condData = new BsonDocument {};
+            var ifContent = new BsonDocument {};
+
+            var time = server_snapshot.GetDateFromRecord();
+
+            var gtArray = new BsonArray();
+            gtArray.Add(new BsonInt32(time));
+            gtArray.Add(new BsonString("$data.lgdt"));
+            ifContent["$gt"] = gtArray;
+            condData["if"] = ifContent;
+            condData["then"] = new BsonInt32(time);
+            condData["else"] = new BsonString("$data.lgdt");
+
+            var condStatement = new BsonDocument{};
+            condStatement["$cond"] = condData;
+
+            projectDocument[COMPUTED_PREFIX + "lgdt"] = condStatement;
+        }
+        private static void SetFirstPlayTime(BsonDocument projectDocument, BF2142Snapshot server_snapshot) {
+            var timestamp = server_snapshot.GetDateFromRecord();
+
+            var minArray = new BsonArray{};
+
+            var ifNullArray = new BsonArray{};
+            ifNullArray.Add(new BsonString("$data.acdt"));
+            ifNullArray.Add(new BsonInt64(99999999999));
+
+            var ifNullDocument = new BsonDocument{};
+            ifNullDocument["$ifNull"] = ifNullArray;
+            minArray.Add(ifNullDocument);
+
+            minArray.Add(new BsonInt32(timestamp));
+
+            var minDocument = new BsonDocument{};
+            minDocument["$min"] = minArray;
+
+            projectDocument[COMPUTED_PREFIX + "acdt"] = minDocument;
         }
         private static void IncrementTotalPlays(BsonDocument projectDocument, BF2142PlayerSnapshot snapshot) {
              string key = "attp-0";
@@ -203,6 +248,123 @@ namespace BF2142.SnapshotProcessor {
 
             projectDocument[COMPUTED_PREFIX + csKey] = addStatement;
 
+        }
+
+        private static void AttachVehicleKDRRatio(BsonDocument projectDocument) {
+            var type = typeof(BF2142PlayerSnapshot);
+            var props = type.GetProperties();
+            foreach(var prop in props) {
+                var attrs = prop.GetCustomAttributes(false);
+                var vehicleAttribute = (VehicleAttribute)attrs.Where(g => g.GetType() == typeof(VehicleAttribute)).FirstOrDefault();
+                if(vehicleAttribute != null) {
+                    int vehicleId = vehicleAttribute.VehicleId;
+                    var key = string.Format("vkdr-{0}", vehicleId);
+
+                    var KillsKey = string.Format("vkls-{0}",vehicleId);
+                    var DeathKey = string.Format("vdths-{0}",vehicleId);
+
+                    var divArray = new BsonArray {};
+                    divArray.Add(new BsonString(string.Format("$data.{0}", KillsKey)));
+                    divArray.Add(new BsonString(string.Format("$data.{0}", DeathKey)));
+
+                    var divDoc = new BsonDocument {};
+                    divDoc["$divide"] = divArray;
+
+                    var condData = new BsonDocument {};
+                    var ifContent = new BsonDocument {};
+
+                    var gtArray = new BsonArray();
+                    gtArray.Add(new BsonString(string.Format("$data.{0}", DeathKey)));
+                    gtArray.Add(new BsonInt32(0));
+                    ifContent["$gt"] = gtArray;
+                    condData["if"] = ifContent;
+                    condData["then"] = divDoc;
+                    condData["else"] = new BsonInt32(0);
+
+                    var condStatement = new BsonDocument{};
+                    condStatement["$cond"] = condData;
+
+                    projectDocument[COMPUTED_PREFIX + key] = condStatement;
+                }
+            }
+        }
+
+        private static void AttachWeaponKDRRatio(BsonDocument projectDocument) {
+            var type = typeof(BF2142PlayerSnapshot);
+            var props = type.GetProperties();
+            foreach(var prop in props) {
+                var attrs = prop.GetCustomAttributes(false);
+                var weaponAttribute = (WeaponAttribute)attrs.Where(g => g.GetType() == typeof(WeaponAttribute)).FirstOrDefault();
+                if(weaponAttribute != null) {
+                    int weaponId = weaponAttribute.WeaponId;
+                    var key = string.Format("wkdr-{0}", weaponId);
+
+                    var KillsKey = string.Format("wkls-{0}",weaponId);
+                    var DeathKey = string.Format("wdths-{0}",weaponId);
+
+                    var divArray = new BsonArray {};
+                    divArray.Add(new BsonString(string.Format("$data.{0}", KillsKey)));
+                    divArray.Add(new BsonString(string.Format("$data.{0}", DeathKey)));
+
+                    var divDoc = new BsonDocument {};
+                    divDoc["$divide"] = divArray;
+
+                    var condData = new BsonDocument {};
+                    var ifContent = new BsonDocument {};
+
+                    var gtArray = new BsonArray();
+                    gtArray.Add(new BsonString(string.Format("$data.{0}", DeathKey)));
+                    gtArray.Add(new BsonInt32(0));
+                    ifContent["$gt"] = gtArray;
+                    condData["if"] = ifContent;
+                    condData["then"] = divDoc;
+                    condData["else"] = new BsonInt32(0);
+
+                    var condStatement = new BsonDocument{};
+                    condStatement["$cond"] = condData;
+
+                    projectDocument[COMPUTED_PREFIX + key] = condStatement;
+                }
+            }
+        }
+
+        private static void AttachWeaponAccuracyRatio(BsonDocument projectDocument) {
+            var type = typeof(BF2142PlayerSnapshot);
+            var props = type.GetProperties();
+            foreach(var prop in props) {
+                var attrs = prop.GetCustomAttributes(false);
+                var weaponAttribute = (WeaponAttribute)attrs.Where(g => g.GetType() == typeof(WeaponAttribute)).FirstOrDefault();
+                if(weaponAttribute != null) {
+                    int weaponId = weaponAttribute.WeaponId;
+                    var key = string.Format("waccu-{0}", weaponId);
+
+                    var KillsKey = string.Format("wbh-{0}",weaponId);
+                    var DeathKey = string.Format("wbf-{0}",weaponId);
+
+                    var divArray = new BsonArray {};
+                    divArray.Add(new BsonString(string.Format("$data.{0}", KillsKey)));
+                    divArray.Add(new BsonString(string.Format("$data.{0}", DeathKey)));
+
+                    var divDoc = new BsonDocument {};
+                    divDoc["$divide"] = divArray;
+
+                    var condData = new BsonDocument {};
+                    var ifContent = new BsonDocument {};
+
+                    var gtArray = new BsonArray();
+                    gtArray.Add(new BsonString(string.Format("$data.{0}", DeathKey)));
+                    gtArray.Add(new BsonInt32(0));
+                    ifContent["$gt"] = gtArray;
+                    condData["if"] = ifContent;
+                    condData["then"] = divDoc;
+                    condData["else"] = new BsonInt32(0);
+
+                    var condStatement = new BsonDocument{};
+                    condStatement["$cond"] = condData;
+
+                    projectDocument[COMPUTED_PREFIX + key] = condStatement;
+                }
+            }
         }
 
         private static void AttachWinLossRatio(BsonDocument projectDocument) {

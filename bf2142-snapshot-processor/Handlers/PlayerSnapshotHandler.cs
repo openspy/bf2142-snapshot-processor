@@ -58,7 +58,6 @@ namespace BF2142.SnapshotProcessor {
         }
         private async Task PerformPlayerProgressHandling(BF2142Snapshot server_snapshot, BF2142PlayerSnapshot snapshot) {
             var type = snapshot.GetType();
-            var props = type.GetProperties();
 
             var searchRequest = new BsonDocument();
             searchRequest.Add(new BsonElement("gameid", new BsonInt32(_processorConfig.gameid)));

@@ -88,9 +88,9 @@ namespace BF2142SnapshotProcessor.JsonConverters {
                 return int.Parse(reader.GetString());
             } else if(propertyType == typeof(string)) {
                 return reader.GetString();
-            } else if(propertyType == typeof(double)) {
+            } else if(propertyType == typeof(double) || propertyType == typeof(Nullable<double>)) {
                 return double.Parse(reader.GetString());
-            } else if(propertyType == typeof(float)) {
+            } else if(propertyType == typeof(float) || propertyType == typeof(Nullable<float>)) {
                 return float.Parse(reader.GetString());
             } else if(propertyType == typeof(System.DateTime)) {
                 var converter = new BF2142SnapshotProcessor.JsonConverters.DecimalTimeConverter();

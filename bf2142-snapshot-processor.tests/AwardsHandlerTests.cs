@@ -5,15 +5,18 @@ using System.Collections.Generic;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using System.Threading.Tasks;
+using  System.Text.Json.Serialization;
 using MongoDB.Bson.Serialization;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using Newtonsoft.Json;
 using BF2142.SnapshotProcessor;
 using Moq;
+using System.Text.RegularExpressions;
 namespace bf2142_snapshot_processor.tests
 {
-    public class Tests
+
+    public class AwardsHandlerTests
     {
         private Mock<IMongoCollection<BsonDocument>> _collection;
         [SetUp]
@@ -172,10 +175,29 @@ namespace bf2142_snapshot_processor.tests
             }
         }
         private bool TestHasProperty(string name) {
+
             var snapshotType = typeof(BF2142PlayerSnapshot);
+            if(name[0] == 'v') {
+                
+                var vehicleMatch = Regex.Match(name, @"v(\w+)-(\d+)");
+                if(vehicleMatch.Success) {
+                    snapshotType = typeof(BF2142Vehicle);
+                    name = vehicleMatch.Groups.Values.ElementAt(1).Value;
+                }
+            }
+
+            if(name[0] == 'w') {
+                var weaponMatch = Regex.Match(name, @"w(\w+)-(\d+)");
+                if(weaponMatch.Success) {
+                    snapshotType = typeof(BF2142Weapon);
+                    name = weaponMatch.Groups.Values.ElementAt(1).Value;
+                }
+                
+            }
+            
             var props = snapshotType.GetProperties();
 
-            var prop = props.Where(g => g.GetCustomAttributes(false).Where(x => x.GetType() == typeof(Newtonsoft.Json.JsonPropertyAttribute) && ((Newtonsoft.Json.JsonPropertyAttribute)x).PropertyName.Equals(name)).FirstOrDefault() != null).FirstOrDefault();
+            var prop = props.Where(g => g.GetCustomAttributes(false).Where(x => x.GetType() == typeof(JsonPropertyNameAttribute) && ((JsonPropertyNameAttribute)x).Name.Equals(name)).FirstOrDefault() != null).FirstOrDefault();
             return prop != null;
         }
 
