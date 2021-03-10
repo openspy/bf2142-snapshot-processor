@@ -258,6 +258,7 @@ namespace BF2142.SnapshotProcessor {
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
         [JsonPropertyName("pdt")]
+        [JsonConverter(typeof(BF2142SnapshotProcessor.JsonConverters.PlayerDogtagConverter))]
         public System.Collections.Generic.Dictionary<int, int> player_dog_tags {get; set; }      //+ => Unique Dog Tags Collected //array
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]

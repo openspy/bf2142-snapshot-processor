@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using BF2142.SnapshotProcessor;
+using BF2142SnapshotProcessor.Converters;
 
 namespace BF2142SnapshotProcessor.JsonConverters {
     public class BF2142SnapshotConverter : JsonConverter<BF2142Snapshot> {
@@ -95,6 +96,8 @@ namespace BF2142SnapshotProcessor.JsonConverters {
             } else if(propertyType == typeof(System.DateTime)) {
                 var converter = new BF2142SnapshotProcessor.JsonConverters.DecimalTimeConverter();
                 return converter.Read(ref reader, propertyType, options);                
+            } else if(propertyType == typeof(System.Collections.Generic.Dictionary<int, int>)) {
+                return PlayerDogTagsConverter.ParseDogtagsString(reader.GetString());
             } else {
                 throw new NotImplementedException();
             }
@@ -106,6 +109,7 @@ namespace BF2142SnapshotProcessor.JsonConverters {
             }
 
             BF2142PlayerSnapshot player_snapshot = new BF2142PlayerSnapshot();
+            player_snapshot.index = player_index;
 
             snapshot.player_snapshots.Add(player_index, player_snapshot);
 

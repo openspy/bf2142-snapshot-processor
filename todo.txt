@@ -1,0 +1,4 @@
+favourite map/guns, etc
+rank
+dogtag handling
+medal processing
