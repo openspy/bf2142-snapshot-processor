@@ -98,6 +98,10 @@ namespace BF2142.SnapshotProcessor {
             var incStatement = new BsonDocument {};
             incStatement["$inc"] = updateDocument;
 
+            if(updateDocument.ElementCount == 0) { //no data to be updated, can't update, no point on inserting later, so just return true
+                return true;
+            }
+
             var result = await collection.UpdateOneAsync(whereStatement, incStatement);
             return result.MatchedCount > 0;
         }
@@ -119,11 +123,11 @@ namespace BF2142.SnapshotProcessor {
                 var variableName = prefix + outputAttribute.VariableName;
 
                 var value = prop.GetValue(currentPlayerInfo);                        
-                if(int.TryParse(value.ToString(), out int intValue)) {
+                if(value != null && int.TryParse(value.ToString(), out int intValue)) {
                     record[variableName] = new BsonInt32(intValue);
-                } else if(double.TryParse(value.ToString(), out double doubleValue)) {
+                } else if(value != null && double.TryParse(value.ToString(), out double doubleValue)) {
                     record[variableName] = new BsonDouble(doubleValue);
-                } else {
+                } else if(value != null) {
                     record[variableName] = new BsonString(value.ToString());
                 } 
             }

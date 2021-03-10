@@ -20,7 +20,7 @@ namespace BF2142.SnapshotProcessor {
         private readonly ILogger<PlayerSnapshotHandler> _logger;
         private readonly IMongoCollection<BsonDocument> _collection;
 
-        const string BASE_PAGE_KEY = "player_info";
+        public const string BASE_PAGE_KEY = "player_info";
         public PlayerSnapshotHandler(BF2142.SnapshotProcessor.ProcessorConfiguration processorConfig, IMongoDatabase database, IPersistentStorage persistentStorage, ILogger<PlayerSnapshotHandler> logger) {
              _processorConfig = processorConfig;
              _database = database;
@@ -34,7 +34,7 @@ namespace BF2142.SnapshotProcessor {
             await PerformGreaterThans(snapshot);
             await PerformSets(snapshot);
 
-            //await PerformComputedHandling(server_snapshot, snapshot);
+            await PlayerInfo_ComputedHandler.PerformComputations(server_snapshot, snapshot,  _processorConfig, _collection);
             await PlayerInfoOutputHandler.PerformPlayerInfoHandling(snapshot.profileid, _collection, _processorConfig); //insert into "base", "ply" etc pages   
 
             await PerformPlayerProgressHandling(server_snapshot, snapshot);
@@ -69,46 +69,10 @@ namespace BF2142.SnapshotProcessor {
             if(record != null) {
                 var data = record["data"].AsBsonDocument;
 
-                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonSerializer.Deserialize(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot));
+                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonSerializer.Deserialize(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot), new JsonSerializerOptions { 
+                    IgnoreNullValues = true
+                });
                 await PlayerProgress_Handlers.PerformComputations(server_snapshot, snapshot, currentSnapshot, _processorConfig, _collection);
-            }
-        }
-        private async Task PerformComputedHandling(BF2142Snapshot server_snapshot, BF2142PlayerSnapshot snapshot) {
-
-            var type = snapshot.GetType();
-            var props = type.GetProperties();
-
-            var searchRequest = new BsonDocument();
-            searchRequest.Add(new BsonElement("gameid", new BsonInt32(_processorConfig.gameid)));
-            searchRequest.Add(new BsonElement("profileid", new BsonInt32(snapshot.profileid)));
-            searchRequest.Add(new BsonElement("pageKey", new BsonString(BASE_PAGE_KEY)));
-
-            var setRecord = new BsonDocument {
-
-            };
-            var setNamePrefix = "data.";
-
-            var record = await (await _collection.FindAsync(searchRequest)).FirstOrDefaultAsync();
-
-            if(record != null) {
-                var data = record["data"].AsBsonDocument;
-
-                BF2142PlayerSnapshot currentSnapshot = (BF2142PlayerSnapshot)JsonSerializer.Deserialize(data.ToJson().ToString(), typeof(BF2142PlayerSnapshot));
-                PlayerInfo_ComputedHandler.PerformComputations(server_snapshot, snapshot, currentSnapshot, _processorConfig);
-
-                foreach(var prop in props) {
-                    HandleProperty(prop, setRecord, setNamePrefix, currentSnapshot, false, false, true, false);
-                }
-
-                var updateRecord = new BsonDocument {};
-                updateRecord["$set"] = setRecord;
-
-                var searchRecord = new BsonDocument{};
-                searchRecord["gameid"] = _processorConfig.gameid;
-                searchRecord["profileid"] = snapshot.profileid;
-                searchRecord["pageKey"] = BASE_PAGE_KEY;
-
-                await _collection.UpdateOneAsync(searchRecord, updateRecord, new UpdateOptions { IsUpsert = true});
             }
         }
         #region PerformIncrements

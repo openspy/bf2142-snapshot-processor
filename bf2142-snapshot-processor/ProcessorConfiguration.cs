@@ -38,6 +38,7 @@ namespace BF2142.SnapshotProcessor {
     }
     public class ProcessorConfiguration : QueueProcessor.ProcessorConfiguration {
         public DatabaseSettings _databaseSettings {get; set;} //exposed for testing
+        public string collectionName { get => "player_progress"; set {}  }
         public ProcessorConfiguration() {
             _databaseSettings = null;
         }

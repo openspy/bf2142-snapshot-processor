@@ -84,7 +84,7 @@ namespace BF2142SnapshotProcessor.JsonConverters {
             if(!reader.Read()) {
                 throw new JsonException();
             }
-            if(propertyType == typeof(System.Int32)) {
+            if(propertyType == typeof(System.Int32) || propertyType == typeof(Nullable<System.Int32>)) {
                 return int.Parse(reader.GetString());
             } else if(propertyType == typeof(string)) {
                 return reader.GetString();

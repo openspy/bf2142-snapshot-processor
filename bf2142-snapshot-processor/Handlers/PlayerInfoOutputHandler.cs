@@ -13,38 +13,68 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 namespace BF2142.SnapshotProcessor {
     public static class PlayerInfoOutputHandler {
-            const string BASE_PAGE_KEY = "player_info";
             public static async Task PerformPlayerInfoHandling(int profileid, IMongoCollection<BsonDocument> collection, ProcessorConfiguration processorConfig) {
-
-            var searchRequest = new BsonDocument();
-            searchRequest.Add(new BsonElement("gameid", new BsonInt32(processorConfig.gameid)));
-            searchRequest.Add(new BsonElement("profileid", new BsonInt32(profileid)));
-            searchRequest.Add(new BsonElement("pageKey", new BsonString(BASE_PAGE_KEY)));
-
-            var record = await (await collection.FindAsync(searchRequest)).FirstOrDefaultAsync();
-
-            if(record != null) {
-                var data = record["data"].AsBsonDocument;
-
-
                 //now that all calculations, etc are done, output to pages!
                 string[] pages = new string[] {"base","ply","titan","wrk","com","ovr","comp", "veh", "wep"};
                 foreach(var page in pages) {
-                    await PerformPlayerInfoHandlingForType(profileid, page, data, collection, processorConfig);
-                    await PerformPlayerInfoHandlingForType_Vehicles(profileid, page, data, collection, processorConfig);
-                    await PerformPlayerInfoHandlingForType_Weapons(profileid, page, data, collection, processorConfig);
-                }
+                    var projectData = new BsonDocument {};
+                    projectData["gameid"] = new BsonInt32(1);
+                    projectData["pageKey"] = new BsonString(PlayerSnapshotHandler.BASE_PAGE_KEY + "_" + page);
+                    projectData["profileid"] = new BsonInt32(1);
+                    projectData["_id"] = new BsonInt32(0);
+                    PerformPlayerInfoHandlingForType(profileid, page, projectData);
+                    PerformPlayerInfoHandlingForType_Vehicles(profileid, page, projectData);
+                    PerformPlayerInfoHandlingForType_Weapons(profileid, page, projectData);
 
-            }
+                    await WriteProjectionToPage(page, profileid, projectData, processorConfig, collection);
+                }
         }
 
-        private static async Task PerformPlayerInfoHandlingForType(int profileid, string name, BsonDocument playerInfoData, IMongoCollection<BsonDocument> collection, ProcessorConfiguration processorConfig) {
-            var key = BASE_PAGE_KEY + "_" + name;
+        private static async Task WriteProjectionToPage(string pageName, int profileid, BsonDocument projectionRecord, ProcessorConfiguration processorConfig, IMongoCollection<BsonDocument> collection) {
+            var aggregate = new BsonDocument[3];
+
+            var matchRecord = new BsonDocument {};
+            matchRecord["pageKey"] = new BsonString(PlayerSnapshotHandler.BASE_PAGE_KEY);
+            matchRecord["gameid"] = new BsonInt32(processorConfig.gameid);
+            matchRecord["profileid"] = new BsonInt32(profileid);
+
+            var match = new BsonDocument {};
+            match["$match"] = matchRecord;
+
+            aggregate[0] = match;
+
+            var projection = new BsonDocument {};
+            projection["$project"] = projectionRecord;
+            aggregate[1] = projection;
+
+            var mergeRecord = new BsonDocument{};
+
+            var merge = new BsonDocument {};
+            merge["into"] = new BsonString(processorConfig.collectionName);
+
+            var on = new BsonArray();
+            on.Add(new BsonString("gameid"));
+            on.Add(new BsonString("pageKey"));
+            on.Add(new BsonString("profileid"));
+            merge["on"] = on;
+            merge["whenMatched"] = new BsonString("replace");
+            merge["whenNotMatched"] = new BsonString("insert");
+
+            mergeRecord["$merge"] = merge;
+
+            aggregate[2] = mergeRecord;
+
+            PipelineDefinition<BsonDocument, BsonDocument> pipeline = aggregate;
+            await collection.AggregateAsync(pipeline);
+        }
+
+        private static void PerformPlayerInfoHandlingForType(int profileid, string name, BsonDocument projectionData) {
+            var key = PlayerSnapshotHandler.BASE_PAGE_KEY + "_" + name;
 
             var type = typeof(BF2142PlayerSnapshot);
             var props = type.GetProperties();
 
-            var setData = new BsonDocument {};
+            
 
             foreach(var prop in props) {
                 var attrs = prop.GetCustomAttributes(false);
@@ -57,27 +87,14 @@ namespace BF2142.SnapshotProcessor {
 
                 var playerInfoOutput = (PlayerInfoOutputPageAttribute)attrs.Where(g => g.GetType() == typeof(PlayerInfoOutputPageAttribute) && ((PlayerInfoOutputPageAttribute)g).PageName.Equals(name)).FirstOrDefault();
                 var propName = jsonHandler?.Name ?? prop.Name;
-                if(playerInfoData.Contains(propName) && playerInfoOutput != null) {
-                    setData["data." + propName] = playerInfoData[propName];
+                if(playerInfoOutput != null) {
+                    projectionData["data." + propName] = new BsonInt32(1);
                 }
             }
-
-            var updateRecord = new BsonDocument{};
-
-            updateRecord["$set"] = setData;
-
-
-            var searchRequest = new BsonDocument();
-            searchRequest.Add(new BsonElement("gameid", new BsonInt32(processorConfig.gameid)));
-            searchRequest.Add(new BsonElement("profileid", new BsonInt32(profileid)));
-            searchRequest.Add(new BsonElement("pageKey", new BsonString(key)));
-
-            if(setData.ElementCount > 0) {
-                await collection.UpdateOneAsync(searchRequest, updateRecord, new UpdateOptions { IsUpsert = true});
-            }
         }
+
         #region Player Info - Vehicle Handling
-            private static Task PerformPlayerInfoHandlingForType_WriteVehicleToDocument(BsonDocument playerInfoData, BsonDocument setData, int vehicleIndex, string pageName) {
+            private static void PerformPlayerInfoHandlingForType_WriteVehicleToDocument(BsonDocument projectionData, int vehicleIndex, string pageName) {
                 var type = typeof(BF2142Vehicle);
 
                 var props = type.GetProperties();
@@ -94,20 +111,16 @@ namespace BF2142.SnapshotProcessor {
 
                     var propName = prefix + (jsonHandler?.Name ?? prop.Name) + suffix;
 
-                    if(playerInfoData.Contains(propName) && playerInfoOutput != null) {
-                        setData["data." + propName] = playerInfoData[propName];
+                    if(playerInfoOutput != null) {
+                        projectionData["data." + propName] = new BsonInt32(1);
                     }
                 }
-
-                return Task.CompletedTask;
             }
-            private static async Task PerformPlayerInfoHandlingForType_Vehicles(int profileid, string name, BsonDocument playerInfoData, IMongoCollection<BsonDocument> collection, ProcessorConfiguration processorConfig) {
-                var key = BASE_PAGE_KEY + "_" + name;
+            private static void PerformPlayerInfoHandlingForType_Vehicles(int profileid, string name, BsonDocument projectionData) {
+                var key = PlayerSnapshotHandler.BASE_PAGE_KEY + "_" + name;
 
                 var type = typeof(BF2142PlayerSnapshot);
                 var props = type.GetProperties();
-
-                var setData = new BsonDocument {};
 
                 foreach(var prop in props) {
                     var attrs = prop.GetCustomAttributes(false);
@@ -115,28 +128,13 @@ namespace BF2142.SnapshotProcessor {
                     var vehicleAttribute = (VehicleAttribute)attrs.Where(g => g.GetType() == typeof(VehicleAttribute)).FirstOrDefault();
                     if(vehicleAttribute == null) continue;
 
-                    await PerformPlayerInfoHandlingForType_WriteVehicleToDocument(playerInfoData, setData, vehicleAttribute.VehicleId, name);
-                }
-
-                var updateRecord = new BsonDocument{};
-
-                updateRecord["$set"] = setData;
-
-
-                var searchRequest = new BsonDocument();
-                searchRequest.Add(new BsonElement("gameid", new BsonInt32(processorConfig.gameid)));
-                searchRequest.Add(new BsonElement("profileid", new BsonInt32(profileid)));
-                searchRequest.Add(new BsonElement("pageKey", new BsonString(key)));
-
-                if(setData.ElementCount > 0) {
-                    await collection.UpdateOneAsync(searchRequest, updateRecord, new UpdateOptions { IsUpsert = true});
+                    PerformPlayerInfoHandlingForType_WriteVehicleToDocument(projectionData, vehicleAttribute.VehicleId, name);
                 }
                 
             }
             #endregion
-
-            #region Player Info - Weapon Handling
-            private static Task PerformPlayerInfoHandlingForType_WriteWeaponToDocument(BsonDocument playerInfoData, BsonDocument setData, int weaponIndex, string pageName) {
+        #region Player Info - Weapon Handling
+            private static void PerformPlayerInfoHandlingForType_WriteWeaponToDocument(BsonDocument projectionData, int weaponIndex, string pageName) {
                 var type = typeof(BF2142Weapon);
 
                 var props = type.GetProperties();
@@ -153,15 +151,13 @@ namespace BF2142.SnapshotProcessor {
 
                     var propName = prefix + (jsonHandler?.Name ?? prop.Name) + suffix;
 
-                    if(playerInfoData.Contains(propName) && playerInfoOutput != null) {
-                        setData["data." + propName] = playerInfoData[propName];
+                    if(playerInfoOutput != null) {
+                        projectionData["data." + propName] = new BsonInt32(1);
                     }
                 }
-
-                return Task.CompletedTask;
             }
-            private static async Task PerformPlayerInfoHandlingForType_Weapons(int profileid, string name, BsonDocument playerInfoData, IMongoCollection<BsonDocument> collection, ProcessorConfiguration processorConfig) {
-                var key = BASE_PAGE_KEY + "_" + name;
+            private static void PerformPlayerInfoHandlingForType_Weapons(int profileid, string name, BsonDocument projectionData) {
+                var key = PlayerSnapshotHandler.BASE_PAGE_KEY + "_" + name;
 
                 var type = typeof(BF2142PlayerSnapshot);
                 var props = type.GetProperties();
@@ -174,24 +170,9 @@ namespace BF2142.SnapshotProcessor {
                     var weaponAttribute = (WeaponAttribute)attrs.Where(g => g.GetType() == typeof(WeaponAttribute)).FirstOrDefault();
                     if(weaponAttribute == null) continue;
 
-                    await PerformPlayerInfoHandlingForType_WriteWeaponToDocument(playerInfoData, setData, weaponAttribute.WeaponId, name);
-                }
-
-                var updateRecord = new BsonDocument{};
-
-                updateRecord["$set"] = setData;
-
-
-                var searchRequest = new BsonDocument();
-                searchRequest.Add(new BsonElement("gameid", new BsonInt32(processorConfig.gameid)));
-                searchRequest.Add(new BsonElement("profileid", new BsonInt32(profileid)));
-                searchRequest.Add(new BsonElement("pageKey", new BsonString(key)));
-                
-                if(setData.ElementCount > 0) {
-                    await collection.UpdateOneAsync(searchRequest, updateRecord, new UpdateOptions { IsUpsert = true});
+                    PerformPlayerInfoHandlingForType_WriteWeaponToDocument(projectionData, weaponAttribute.WeaponId, name);
                 }
             }
             #endregion
-    
     }
 }

@@ -416,7 +416,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
         [PlayerProgressOutputPageAttribute(PageName = "waccu", VariableName = "tots")]
 
-        public int total_shots {get; set; }     //+ => Total Fired
+        public int? total_shots {get; set; }     //+ => Total Fired
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonPropertyName("tt")]
@@ -424,7 +424,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
 
-        public int time_played {get; set; }       //+ => Time Played
+        public int? time_played {get; set; }       //+ => Time Played
         
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [JsonPropertyName("tvdmg")]
@@ -815,7 +815,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
         [PlayerProgressOutputPageAttribute(PageName = "wl", VariableName = "wins")]
-        public int wins {get; set; }
+        public int? wins {get; set; }
 
         [JsonPropertyName("los")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)] //this property is "insecure" because the server could send win: 2000 and increment by 2x, should be capped at 1
@@ -827,7 +827,7 @@ namespace BF2142.SnapshotProcessor {
         [PlayerInfoOutputPageAttribute(PageName = "ovr")]
         [PlayerInfoOutputPageAttribute(PageName = "comp")]
         [PlayerProgressOutputPageAttribute(PageName = "wl", VariableName = "losses")]
-        public int losses {get; set; }
+        public int? losses {get; set; }
 
         [JsonPropertyName("wlr")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
@@ -853,7 +853,7 @@ namespace BF2142.SnapshotProcessor {
         public double overall_accuracy {get; set; }
 
         [JsonPropertyName("ttp")]
-        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Increment)]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
         [PlayerInfoOutputPageAttribute(PageName = "titan")]
@@ -866,7 +866,7 @@ namespace BF2142.SnapshotProcessor {
         public int total_time_played {get; set; }
 
         [JsonPropertyName("brs")]
-        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Computed)]
+        [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_GreaterEqual)]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
         [PlayerInfoOutputPageAttribute(PageName = "ply")]
         [PlayerInfoOutputPageAttribute(PageName = "titan")]
