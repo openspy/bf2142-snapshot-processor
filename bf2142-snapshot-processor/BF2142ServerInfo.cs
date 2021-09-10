@@ -111,17 +111,17 @@ namespace BF2142.SnapshotProcessor {
         [JsonPropertyName("ent-1")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Set)]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
-        public int has_bestbuy_gun {get => 1; set { } }
+        public int has_bestbuy_gun {get => 0; set { } }
 
         [JsonPropertyName("ent-2")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Set)]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
-        public int has_ent_2 {get => 1; set { } }
+        public int has_ent_2 {get => 0; set { } }
 
         [JsonPropertyName("ent-3")]
         [StatsHandlerAttribute(HandlerType = StatsHandlerAttribute.EStatsHandlerType.HandlerType_Set)]
         [PlayerInfoOutputPageAttribute(PageName = "base")]
-        public int has_bf2_vet_tag {get => 1; set { } }
+        public int has_bf2_vet_tag {get => 0; set { } }
 
         
         [JsonPropertyName("t")]
